@@ -904,7 +904,7 @@
       let lastDate = '';
       g.messages.forEach(m => {
         const date = new Date(m.created_at);
-        const dateStr = date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        const dateStr = date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' });
         if (dateStr !== lastDate) {
           const sep = document.createElement('div');
           sep.className = 'msg-date-separator';
@@ -914,7 +914,7 @@
         }
         const bubble = document.createElement('div');
         bubble.className = 'msg-bubble ' + (m.sender === 'admin' ? 'from-admin' : 'from-user');
-        const timeStr = date.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const timeStr = date.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
         const senderLabel = m.sender === 'admin' ? '🛡️ You (Admin)' : '👤 User';
         bubble.innerHTML = '<div class="sender-label">' + senderLabel + '</div>' +
           '<div>' + escapeHtml(m.message) + '</div>' +
@@ -1032,10 +1032,11 @@
 
     function formatTime(timestamp) {
       const d = new Date(timestamp);
-      const todayStr = new Date().toISOString().split('T')[0];
-      const dateStr = d.toISOString().split('T')[0];
-      if (dateStr === todayStr) return d.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-      return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+      const nowIST = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+      const todayStr = new Date(nowIST).toLocaleDateString('en-CA');
+      const dateStr = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+      if (dateStr === todayStr) return d.toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
+      return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', timeZone: 'Asia/Kolkata' });
     }
   </script>
 </body>
