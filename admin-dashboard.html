@@ -284,6 +284,29 @@
         </div>
       </div>
 
+      <!-- Bulk Actions Panel -->
+      <div class="panel" style="border: 1px solid rgba(0,224,148,0.2);">
+        <div class="panel-header">
+          <div class="panel-title">🚀 Bulk Actions</div>
+        </div>
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:12px;">
+          <!-- Bulk Credits -->
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:12px;color:#8888aa;">💰 Sabko credits do:</span>
+            <input type="number" id="bulkCredits" placeholder="500" min="1" style="width:80px;padding:8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#00e094;font-size:13px;font-weight:700;outline:none;">
+            <input type="text" id="bulkMessage" placeholder="🎊 15 Aug pe extra 500 credits FREE!" style="flex:1;min-width:200px;padding:8px 12px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#eaeaf5;font-size:12px;outline:none;">
+            <button id="bulkGiveBtn" style="padding:8px 16px;background:linear-gradient(135deg,#00e094,#00b377);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">🎁 Sabko Do</button>
+          </div>
+          <!-- Single User Credits -->
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:12px;color:#8888aa;">👤 Ek user ko:</span>
+            <input type="email" id="singleEmail" placeholder="user@gmail.com" style="width:200px;padding:8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#eaeaf5;font-size:12px;outline:none;">
+            <input type="number" id="singleCredits" placeholder="500" min="1" style="width:80px;padding:8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#00e094;font-size:13px;font-weight:700;outline:none;">
+            <button id="singleGiveBtn" style="padding:8px 16px;background:linear-gradient(135deg,#7c6aff,#a395ff);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">💰 Credits Do</button>
+          </div>
+        </div>
+      </div>
+
       <!-- All Users Table -->
       <div class="panel">
         <div class="panel-header">
@@ -352,10 +375,17 @@
           body: JSON.stringify({ p_password: adminPassword })
         });
         const data = await res.json();
+        console.log('Dashboard RAW response:', JSON.stringify(data));
         if (data && data.error === 'DENIED') { alert('❌ Access denied!'); return; }
-        allUsers = Array.isArray(data) ? data : (data ? [data] : []);
+        // RPC returns JSON — could be array directly or wrapped
+        let parsed = data;
+        if (typeof data === 'string') {
+          try { parsed = JSON.parse(data); } catch(e) {}
+        }
+        allUsers = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : []);
         // Filter out nulls
         allUsers = allUsers.filter(u => u && u.email);
+        console.log('Dashboard parsed users:', allUsers.length, allUsers);
 
         const now = new Date();
         const totalUsers = allUsers.length;
@@ -426,27 +456,140 @@
       const now = new Date();
       const filtered = allUsers.filter(u => u.email.toLowerCase().includes(searchVal));
       if (filtered.length === 0) { container.innerHTML = '<div class="loading-text">Koi user nahi mila</div>'; return; }
-      let html = '<table class="user-table"><thead><tr><th>Email</th><th>Plan</th><th>Credits</th><th>Expiry</th><th>Status</th><th>Joined</th></tr></thead><tbody>';
+      let html = '<table class="user-table"><thead><tr><th>Email</th><th>Plan</th><th>Credits</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
       filtered.forEach(u => {
         const expiry = u.expiry_date ? new Date(u.expiry_date) : null;
         const isActive = u.credits > 0 && (!expiry || expiry >= now);
         const expiryStr = expiry ? expiry.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-        const joined = u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-        const statusBadge = isActive
-          ? '<span class="status-badge status-active">Active</span>'
-          : '<span class="status-badge status-expired">Expired</span>';
-        html += '<tr><td>' + escapeHtml(u.email) + '</td>' +
+        const isDisabled = u.is_disabled === true;
+        const statusBadge = isDisabled
+          ? '<span class="status-badge" style="background:rgba(255,165,0,0.1);color:#ffa500;">🔧 Off</span>'
+          : isActive
+            ? '<span class="status-badge status-active">Active</span>'
+            : '<span class="status-badge status-expired">Expired</span>';
+        const toggleBtnStyle = isDisabled
+          ? 'background:rgba(255,77,109,0.15);border:1px solid rgba(255,77,109,0.3);color:#ff4d6d;'
+          : 'background:rgba(0,224,148,0.1);border:1px solid rgba(0,224,148,0.3);color:#00e094;';
+        const toggleLabel = isDisabled ? '❌ Off' : '✅ On';
+        const rowStyle = isDisabled ? ' style="opacity:0.5;background:rgba(255,77,109,0.03);"' : '';
+        html += '<tr' + rowStyle + '><td>' + escapeHtml(u.email) + '</td>' +
           '<td>₹' + (u.plan || '0') + '</td>' +
           '<td>' + (u.credits || 0).toLocaleString() + '</td>' +
           '<td>' + expiryStr + '</td>' +
           '<td>' + statusBadge + '</td>' +
-          '<td>' + joined + '</td></tr>';
+          '<td style="white-space:nowrap;">' +
+            '<button onclick="toggleUser(\'' + escapeHtml(u.email) + '\',' + !isDisabled + ')" style="padding:4px 8px;' + toggleBtnStyle + 'border-radius:6px;font-size:10px;cursor:pointer;margin-right:4px;" title="On/Off Toggle">' + toggleLabel + '</button>' +
+            '<button onclick="unblockUser(\'' + escapeHtml(u.email) + '\')" style="padding:4px 8px;background:rgba(124,106,255,0.1);border:1px solid rgba(124,106,255,0.3);color:#9d8cff;border-radius:6px;font-size:10px;cursor:pointer;margin-right:4px;" title="Device Reset">🔓</button>' +
+            '<button onclick="giveCreditsPrompt(\'' + escapeHtml(u.email) + '\')" style="padding:4px 8px;background:rgba(255,179,71,0.1);border:1px solid rgba(255,179,71,0.3);color:#ffb347;border-radius:6px;font-size:10px;cursor:pointer;" title="Give Credits">💰</button>' +
+          '</td></tr>';
       });
       html += '</tbody></table>';
       container.innerHTML = html;
     }
 
     function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text || ''; return d.innerHTML; }
+
+    // ===== TOGGLE USER ON/OFF =====
+    async function toggleUser(email, disable) {
+      const action = disable ? 'OFF (Maintenance)' : 'ON (Chalu)';
+      if (!confirm('⚙️ "' + email + '" ko ' + action + ' karna hai?')) return;
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_toggle_user', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: adminPassword, p_user_email: email, p_disabled: disable })
+        });
+        const data = await res.json();
+        if (data === 'DONE' || (typeof data === 'string' && data.includes('DONE'))) {
+          alert('✅ ' + email + ' → ' + action);
+          await loadDashboard();
+        } else {
+          alert('❌ Failed: ' + JSON.stringify(data));
+        }
+      } catch (e) { alert('❌ Error: ' + e.message); }
+    }
+
+    // ===== UNBLOCK USER =====
+    async function unblockUser(email) {
+      if (!confirm('🔓 "' + email + '" ka device RESET karna hai?')) return;
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_reset_device', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: adminPassword, p_user_email: email })
+        });
+        const data = await res.json();
+        if (data === 'RESET' || (typeof data === 'string' && data.includes('RESET'))) {
+          alert('✅ ' + email + ' UNBLOCKED!');
+        } else {
+          alert('❌ Failed: ' + JSON.stringify(data));
+        }
+      } catch (e) { alert('❌ Error: ' + e.message); }
+    }
+
+    // ===== GIVE CREDITS TO SINGLE USER (from table button) =====
+    async function giveCreditsPrompt(email) {
+      const credits = prompt('💰 "' + email + '" ko kitne credits dene hain?', '500');
+      if (!credits || isNaN(credits) || parseInt(credits) <= 0) return;
+      await giveCreditsSingle(email, parseInt(credits));
+    }
+
+    async function giveCreditsSingle(email, credits) {
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_give_credits', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: adminPassword, p_user_email: email, p_credits: credits, p_message: '🎁 Admin ne aapko ' + credits + ' credits diye hain!' })
+        });
+        const data = await res.json();
+        if (data === 'DONE' || (typeof data === 'string' && data.includes('DONE'))) {
+          alert('✅ ' + email + ' ko ' + credits + ' credits de diye!');
+          await loadDashboard();
+        } else {
+          alert('❌ Failed: ' + JSON.stringify(data));
+        }
+      } catch (e) { alert('❌ Error: ' + e.message); }
+    }
+
+    // ===== BULK GIVE CREDITS (Sabko) =====
+    document.getElementById('bulkGiveBtn').addEventListener('click', async () => {
+      const credits = parseInt(document.getElementById('bulkCredits').value);
+      const message = document.getElementById('bulkMessage').value.trim();
+      if (!credits || credits <= 0) { alert('⚠️ Credits amount daalo!'); return; }
+      if (!message) { alert('⚠️ Banner message likho!'); return; }
+      if (!confirm('🎁 Sabhi ' + allUsers.length + ' users ko ' + credits + ' credits dene hain?\n\nMessage: ' + message)) return;
+
+      const btn = document.getElementById('bulkGiveBtn');
+      btn.disabled = true; btn.textContent = '⏳ Sending...';
+      let success = 0;
+      for (const u of allUsers) {
+        try {
+          const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_give_credits', {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_password: adminPassword, p_user_email: u.email, p_credits: credits, p_message: message })
+          });
+          const data = await res.json();
+          if (data === 'DONE' || (typeof data === 'string' && data.includes('DONE'))) success++;
+        } catch (e) {}
+      }
+      btn.disabled = false; btn.textContent = '🎁 Sabko Do';
+      alert('✅ ' + success + '/' + allUsers.length + ' users ko ' + credits + ' credits de diye!');
+      document.getElementById('bulkCredits').value = '';
+      document.getElementById('bulkMessage').value = '';
+      await loadDashboard();
+    });
+
+    // ===== SINGLE USER CREDITS (from top panel) =====
+    document.getElementById('singleGiveBtn').addEventListener('click', async () => {
+      const email = document.getElementById('singleEmail').value.trim();
+      const credits = parseInt(document.getElementById('singleCredits').value);
+      if (!email) { alert('⚠️ Email daalo!'); return; }
+      if (!credits || credits <= 0) { alert('⚠️ Credits amount daalo!'); return; }
+      await giveCreditsSingle(email, credits);
+      document.getElementById('singleEmail').value = '';
+      document.getElementById('singleCredits').value = '';
+    });
   </script>
 </body>
 </html>
