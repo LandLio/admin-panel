@@ -906,7 +906,8 @@
         '<div class="chat-user-avatar">' + initial + '</div><div>' +
         '<div class="chat-user-name">' + escapeHtml(email) + '</div>' +
         '<div class="chat-user-email">' + g.messages.length + ' messages</div></div></div>' +
-        '<button class="delete-chat-btn" id="deleteChatBtn">🗑️ Delete Chat</button></div>' +
+        '<div style="display:flex;gap:6px;"><button class="delete-chat-btn" id="unblockBtn" style="background:rgba(0,224,148,0.12);color:#00e094;border-color:rgba(0,224,148,0.3);" title="Device ID reset karke unblock karo">🔓 Unblock</button>' +
+        '<button class="delete-chat-btn" id="deleteChatBtn">🗑️ Delete</button></div></div>' +
         '<div class="chat-messages-area" id="chatMsgArea"></div>' +
         '<div class="reply-area"><input type="text" class="reply-input" id="replyInput" placeholder="Reply likho..." maxlength="500">' +
         '<button class="reply-send-btn" id="replySendBtn">➤</button></div>';
@@ -939,6 +940,7 @@
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdminReply(email); }
       });
       document.getElementById('deleteChatBtn').addEventListener('click', () => deleteConversation(email));
+      document.getElementById('unblockBtn').addEventListener('click', () => unblockUser(email));
       document.getElementById('replyInput').focus();
     }
 
@@ -993,6 +995,23 @@
             '<div class="empty-state-sub">Kisi aur user ko select karo</div></div>';
         } else {
           alert('❌ Delete failed: ' + JSON.stringify(data));
+        }
+      } catch (e) { alert('❌ Network error: ' + e.message); }
+    }
+
+    async function unblockUser(email) {
+      if (!confirm('🔓 "' + email + '" ka device RESET karna hai?\n\nUser next login pe naye device se bind hoga.')) return;
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_reset_device', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: adminPassword, p_user_email: email })
+        });
+        const data = await res.json();
+        if (data === 'RESET' || (typeof data === 'string' && data.includes('RESET'))) {
+          alert('✅ ' + email + ' UNBLOCKED! Device reset ho gaya.');
+        } else {
+          alert('❌ Unblock failed: ' + JSON.stringify(data));
         }
       } catch (e) { alert('❌ Network error: ' + e.message); }
     }
