@@ -829,7 +829,18 @@
 
         updateStats();
         renderUserList();
-        if (selectedUser) renderChat(selectedUser);
+        if (selectedUser) {
+          // Input preserve karo — user type kar raha ho toh clear na ho
+          const existingInput = document.getElementById('replyInput');
+          const savedValue = existingInput ? existingInput.value : '';
+          const wasFocused = existingInput && document.activeElement === existingInput;
+          renderChat(selectedUser);
+          const newInput = document.getElementById('replyInput');
+          if (newInput && savedValue) {
+            newInput.value = savedValue;
+            if (wasFocused) newInput.focus();
+          }
+        }
       } catch (e) {
         console.error('loadAllMessages error:', e);
       }
