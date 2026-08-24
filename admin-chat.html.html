@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Chat Panel — DATA ENTRY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --flat-bg: #0f172a;
+      --flat-sidebar: #1e293b;
+      --flat-chat-bg: #0b1120;
+      --flat-card: #1e293b;
+      --flat-card-hover: #273549;
+      --flat-border: #334155;
+      --flat-border-light: #475569;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
+      
+      --flat-blue: #3b82f6;
+      --flat-blue-hover: #2563eb;
+      --flat-green: #10b981;
+      --flat-green-hover: #059669;
+      --flat-yellow: #f59e0b;
+      --flat-red: #ef4444;
+      --flat-purple: #8b5cf6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--flat-bg);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navbar */
+    .top-nav {
+      height: 56px;
+      background: var(--flat-sidebar);
+      border-bottom: 2px solid var(--flat-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-badge {
+      background: var(--flat-blue);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .flat-btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: #f8fafc;
+    }
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-primary {
+      background: var(--flat-blue);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: var(--flat-blue-hover);
+    }
+
+    .btn-success {
+      background: var(--flat-green);
+      color: #ffffff;
+    }
+    .btn-success:hover {
+      background: var(--flat-green-hover);
+    }
+
+    /* Main Chat Layout */
+    .chat-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Left Sidebar: User Conversations */
+    .user-list-pane {
+      width: 340px;
+      background: var(--flat-sidebar);
+      border-right: 2px solid var(--flat-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .search-box {
+      padding: 12px;
+      border-bottom: 1px solid var(--flat-border);
+      background: #162032;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 14px;
+      background: #0f172a;
+      border: 1px solid var(--flat-border);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .search-input:focus {
+      border-color: var(--flat-blue);
+    }
+    .search-input::placeholder { color: var(--text-sub); }
+
+    .users-scroll {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .user-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--flat-border);
+      cursor: pointer;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      transition: background 0.1s ease;
+      position: relative;
+    }
+
+    .user-item:hover {
+      background: var(--flat-card-hover);
+    }
+
+    .user-item.active {
+      background: #253347;
+      border-left: 4px solid var(--flat-blue);
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--flat-blue);
+      flex-shrink: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .user-email-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+
+    .user-email-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-time {
+      font-size: 10px;
+      color: var(--text-sub);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .user-last-msg {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .unread-pill {
+      background: var(--flat-red);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Right Main Chat Thread */
+    .chat-thread-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--flat-chat-bg);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      height: 60px;
+      background: var(--flat-sidebar);
+      border-bottom: 1px solid var(--flat-border);
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .chat-user-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-user-email {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .chat-user-stats {
+      display: flex;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .tag-credits {
+      background: #064e3b;
+      color: #6ee7b7;
+      border: 1px solid #059669;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .tag-plan {
+      background: #312e81;
+      color: #c7d2fe;
+      border: 1px solid #4f46e5;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* Messages Stream */
+    .messages-stream {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .msg-group {
+      display: flex;
+      flex-direction: column;
+      max-width: 68%;
+    }
+
+    .msg-group.user {
+      align-self: flex-start;
+    }
+
+    .msg-group.admin {
+      align-self: flex-end;
+    }
+
+    .msg-bubble {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .msg-group.user .msg-bubble {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid var(--flat-border);
+      border-bottom-left-radius: 2px;
+    }
+
+    .msg-group.admin .msg-bubble {
+      background: var(--flat-blue);
+      color: #ffffff;
+      border-bottom-right-radius: 2px;
+    }
+
+    .msg-meta {
+      font-size: 10px;
+      color: var(--text-sub);
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .msg-group.admin .msg-meta {
+      text-align: right;
+    }
+
+    .chat-img-thumb {
+      max-width: 260px;
+      max-height: 200px;
+      border-radius: 6px;
+      margin-top: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* Quick Reply Templates & Payment Generator */
+    .quick-bar {
+      background: #162032;
+      border-top: 1px solid var(--flat-border);
+      padding: 8px 16px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+
+    .chip-btn {
+      padding: 5px 10px;
+      background: #1e293b;
+      border: 1px solid var(--flat-border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .chip-btn:hover {
+      background: #334155;
+      color: var(--text-main);
+      border-color: var(--flat-blue);
+    }
+
+    /* Input Footer */
+    .chat-input-area {
+      background: var(--flat-sidebar);
+      border-top: 2px solid var(--flat-border);
+      padding: 14px 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .chat-textarea {
+      flex: 1;
+      background: #0f172a;
+      border: 1.5px solid var(--flat-border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-size: 13.5px;
+      font-family: inherit;
+      outline: none;
+      resize: none;
+      height: 44px;
+      line-height: 1.4;
+      transition: border-color 0.15s ease;
+    }
+    .chat-textarea:focus {
+      border-color: var(--flat-blue);
+    }
+
+    .empty-state {
+      margin: auto;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 40px;
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state-title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+
+    /* Password Screen */
+    .pw-screen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--flat-bg); display: flex;
+      justify-content: center; align-items: center; z-index: 9999;
+    }
+    .pw-card {
+      background: var(--flat-card);
+      border: 2px solid var(--flat-border);
+      border-radius: 8px; padding: 36px 32px; width: 380px;
+      text-align: center;
+    }
+    .pw-icon { font-size: 44px; margin-bottom: 12px; }
+    .pw-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px; font-weight: 800; margin-bottom: 6px;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+    .pw-input {
+      width: 100%; padding: 12px 16px;
+      background: #0f172a;
+      border: 1.5px solid var(--flat-border);
+      border-radius: 6px; color: var(--text-main); font-size: 15px;
+      font-family: 'Outfit', sans-serif;
+      outline: none; text-align: center; letter-spacing: 4px;
+      margin-top: 16px;
+    }
+    .pw-input:focus { border-color: var(--flat-blue); }
+    .pw-btn {
+      width: 100%; padding: 12px; margin-top: 14px;
+      background: var(--flat-blue);
+      border: none;
+      border-radius: 6px; color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      text-transform: uppercase;
+    }
+    .pw-btn:hover { background: var(--flat-blue-hover); }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .top-nav {
+        padding: 0 12px;
+        height: 50px;
+      }
+      .nav-brand-title {
+        font-size: 15px;
+      }
+      .nav-badge {
+        display: none;
+      }
+      .nav-actions .flat-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+      .chat-layout {
+        position: relative;
+        width: 100vw;
+        height: calc(100vh - 50px);
+      }
+      .user-list-pane {
+        width: 100%;
+        height: 100%;
+        border-right: none;
+      }
+      .chat-thread-pane {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 20;
+        display: none;
+      }
+      .chat-thread-pane.mobile-open {
+        display: flex !important;
+      }
+      .mobile-back-btn {
+        display: inline-flex !important;
+      }
+      .msg-group {
+        max-width: 88% !important;
+      }
+      .chat-header {
+        padding: 0 10px;
+        height: 52px;
+      }
+      .chat-user-email {
+        font-size: 13px;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .chat-input-area {
+        padding: 8px 10px;
+        gap: 6px;
+      }
+      .chat-textarea {
+        font-size: 13.5px;
+        height: 40px;
+        padding: 8px 12px;
+      }
+      #btnSendReply {
+        height: 40px;
+        padding: 0 16px;
+        font-size: 12.5px;
+      }
+      .quick-bar {
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Password Screen -->
+  <div class="pw-screen" id="pwScreen">
+    <div class="pw-card" style="max-width:92vw;">
+      <div class="pw-icon">💬</div>
+      <div class="pw-title">Admin Chat Portal</div>
+      <div style="font-size:12px;color:var(--text-muted);">Password daalo to access user chats</div>
+      <input type="password" class="pw-input" id="pwInput" placeholder="Password..." autofocus>
+      <button class="pw-btn" id="pwBtn">🔓 Unlock Chat</button>
+      <div id="pwError" style="margin-top:10px;font-size:12px;color:var(--flat-red);font-weight:600;"></div>
+    </div>
+  </div>
+
+  <!-- Main Chat App -->
+  <div id="mainApp" style="display:none; height:100vh; flex-direction:column;">
+    
+    <!-- Top Navbar -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <span style="font-size:20px;">💬</span>
+        <span class="nav-brand-title">Admin Support</span>
+        <span class="nav-badge" id="onlineBadge">LIVE FEED</span>
+      </div>
+      <div class="nav-actions">
+        <a href="admin.html" class="flat-btn btn-secondary">📊 Dashboard</a>
+        <button class="flat-btn btn-primary" onclick="loadAllChats()">🔄 Refresh</button>
+      </div>
+    </header>
+
+    <!-- Chat Layout -->
+    <div class="chat-layout">
+      
+      <!-- Users List -->
+      <aside class="user-list-pane" id="userListPane">
+        <div class="search-box" style="display:flex; gap:6px;">
+          <input type="text" class="search-input" id="userSearchInput" placeholder="🔍 Search or email..." style="flex:1;">
+          <button class="flat-btn btn-primary" onclick="startChatFromSearch()" style="padding:0 12px; font-size:11.5px; font-weight:800; white-space:nowrap; background:linear-gradient(135deg,#3b82f6,#2563eb);" title="Start chat with entered email">➕ Chat</button>
+        </div>
+        <div class="users-scroll" id="usersListContainer">
+          <div class="loading-text">Loading conversations...</div>
+        </div>
+      </aside>
+
+      <!-- Active Chat Thread -->
+      <main class="chat-thread-pane" id="chatThreadPane">
+        <div class="empty-state" id="emptyChatState">
+          <div class="empty-state-icon">👈</div>
+          <div class="empty-state-title">Select a Conversation</div>
+          <div>Left panel se kisi user pe click karo baat karne ke liye</div>
+        </div>
+
+        <div id="activeChatContent" style="display:none; height:100%; flex-direction:column;">
+          <!-- Chat Header -->
+          <div class="chat-header">
+            <div class="chat-user-details">
+              <button class="flat-btn btn-secondary mobile-back-btn" id="mobileBackBtn" onclick="closeMobileChat()" style="display:none; padding:6px 10px; font-size:12px;">⬅️</button>
+              <span style="font-size:22px;">👤</span>
+              <div>
+                <div class="chat-user-email" id="activeUserEmailText">user@gmail.com</div>
+                <div class="chat-user-stats" id="activeUserStats">
+                  <span class="tag-credits" id="activeUserCredits">- Credits</span>
+                  <span class="tag-plan" id="activeUserPlan">- Plan</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <button class="flat-btn btn-success" onclick="openAdminChatPlanModal()" style="font-size:11px; font-weight:800; background:linear-gradient(135deg,#10b981,#059669); box-shadow:0 4px 12px rgba(16,185,129,0.3); border-radius:6px; padding:6px 10px;">💎 Plan</button>
+              <button class="flat-btn btn-secondary" onclick="markAllRead()" style="font-size:11px; padding:6px 10px;">✓ Read</button>
+            </div>
+          </div>
+
+          <!-- Messages Stream -->
+          <div class="messages-stream" id="messagesStream">
+            <!-- Messages rendered dynamically -->
+          </div>
+
+          <!-- Quick Templates Bar -->
+          <div class="quick-bar">
+            <button class="chip-btn" onclick="insertTemplate('Namaste! Aapki problem solve kar di gayi hai. Please extension refresh karein.')">✅ Problem Solved</button>
+            <button class="chip-btn" onclick="insertTemplate('Credits aapke account mein add kar diye gaye hain. Please check.')">💰 Credits Added</button>
+            <button class="chip-btn" onclick="insertTemplate('Kripya IHMS screen ka ek screenshot share karein taaki hum check kar sakein.')">📸 Send Screenshot</button>
+            <button class="chip-btn" onclick="quickSendPayOffer(99, 5000)" style="border-color:#10b981; color:#6ee7b7;">💎 Send ₹99 (5K Cr)</button>
+            <button class="chip-btn" onclick="quickSendPayOffer(199, 8000)" style="border-color:#10b981; color:#6ee7b7;">💎 Send ₹199 (8K Cr)</button>
+            <button class="chip-btn" onclick="quickSendPayOffer(249, 10000)" style="border-color:#10b981; color:#6ee7b7;">💎 Send ₹249 (10K Cr)</button>
+            <button class="chip-btn" onclick="quickSendPayOffer(299, 8000)" style="border-color:#10b981; color:#6ee7b7;">💎 Send ₹299 (8K Cr)</button>
+            <button class="chip-btn" onclick="quickSendPayOffer(499, 15000)" style="border-color:#10b981; color:#6ee7b7;">💎 Send ₹499 (15K Cr)</button>
+            <button class="chip-btn" onclick="openAdminChatPlanModal()" style="border-color:#3b82f6; color:#93c5fd;">⚙️ Custom Plan...</button>
+          </div>
+
+          <!-- Input Box -->
+          <div class="chat-input-area">
+            <textarea class="chat-textarea" id="adminReplyInput" placeholder="Type reply as Admin... (Press Enter to send, Shift+Enter for new line)"></textarea>
+            <button class="flat-btn btn-primary" id="btnSendReply" style="height:44px; padding:0 22px;">Send 🚀</button>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Plan Manager Modal in Admin Chat -->
+  <div id="adminChatPlanModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
+    <div style="background:#1e293b; border:2px solid #3b82f6; border-radius:12px; width:480px; max-width:92vw; padding:24px; color:#f8fafc; font-family:'Inter',sans-serif; box-shadow:0 20px 50px rgba(0,0,0,0.7);">
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #334155; padding-bottom:12px;">
+        <div style="font-family:'Outfit',sans-serif; font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+          <span>💎</span> <span>Plan Manager & Chat Sender</span>
+        </div>
+        <button onclick="closeAdminChatPlanModal()" style="background:none; border:none; color:#94a3b8; font-size:24px; cursor:pointer; line-height:1;">&times;</button>
+      </div>
+
+      <div style="font-size:13px; font-weight:700; color:#38bdf8; background:#0f172a; padding:10px 14px; border-radius:6px; margin-bottom:16px; border:1px solid #334155; display:flex; justify-content:space-between; align-items:center;">
+        <span>👤 User: <span id="modalTargetEmailText">user@gmail.com</span></span>
+        <span id="modalTargetCurrentStats" style="font-size:11px; color:#a7f3d0; font-weight:700;"></span>
+      </div>
+
+      <!-- Action Type Tabs -->
+      <div style="display:flex; gap:8px; margin-bottom:18px; background:#0f172a; padding:4px; border-radius:8px; border:1px solid #334155;">
+        <button id="tabBtnSendOffer" onclick="switchPlanModalTab('offer')" style="flex:1; padding:8px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; background:#3b82f6; color:#fff; border:none; transition:all 0.2s;">
+          💳 Send Pay Link in Chat
+        </button>
+        <button id="tabBtnDirectAssign" onclick="switchPlanModalTab('assign')" style="flex:1; padding:8px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; background:transparent; color:#94a3b8; border:none; transition:all 0.2s;">
+          ⚡ Instant Activate in DB
+        </button>
+      </div>
+
+      <!-- TAB 1: Send Pay Offer in Chat -->
+      <div id="planTabOffer">
+        <div style="font-size:12px; color:#94a3b8; margin-bottom:12px;">Choose a preset or enter custom price/credits to send an interactive payment card in chat:</div>
+        
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:16px;">
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setOfferInputs(99, 5000)"><b>₹99</b><br><span style="font-size:10px; color:#10b981;">5,000 Cr</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setOfferInputs(199, 8000)"><b>₹199</b><br><span style="font-size:10px; color:#10b981;">8,000 Cr</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setOfferInputs(249, 10000)"><b>₹249</b><br><span style="font-size:10px; color:#10b981;">10,000 Cr</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setOfferInputs(299, 8000)"><b>₹299</b><br><span style="font-size:10px; color:#10b981;">8,000 Cr</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setOfferInputs(399, 12000)"><b>₹399</b><br><span style="font-size:10px; color:#10b981;">12,000 Cr</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setOfferInputs(499, 15000)"><b>₹499</b><br><span style="font-size:10px; color:#10b981;">15,000 Cr</span></button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#94a3b8; display:block; margin-bottom:4px;">Price (₹)</label>
+            <input type="number" id="modalOfferPrice" class="search-input" value="299" placeholder="e.g. 299">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#94a3b8; display:block; margin-bottom:4px;">Credits</label>
+            <input type="number" id="modalOfferCredits" class="search-input" value="8000" placeholder="e.g. 8000">
+          </div>
+        </div>
+
+        <button class="flat-btn btn-primary" onclick="submitSendPlanOfferInChat()" style="width:100%; justify-content:center; padding:12px; font-size:13px; font-weight:800; background:linear-gradient(135deg,#3b82f6,#2563eb);">
+          📨 Send Payment Card in Chat 🚀
+        </button>
+      </div>
+
+      <!-- TAB 2: Direct Activate in DB -->
+      <div id="planTabAssign" style="display:none;">
+        <div style="font-size:12px; color:#94a3b8; margin-bottom:12px;">Directly activate plan / add credits in Database (Zero payment needed):</div>
+
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:16px;">
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setAssignInputs('₹99 Plan', 5000, 30)"><b>₹99 Plan</b><br><span style="font-size:10px; color:#10b981;">5K Cr / 30D</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setAssignInputs('₹199 Plan', 8000, 30)"><b>₹199 Plan</b><br><span style="font-size:10px; color:#10b981;">8K Cr / 30D</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setAssignInputs('₹299 Plan', 8000, 30)"><b>₹299 Plan</b><br><span style="font-size:10px; color:#10b981;">8K Cr / 30D</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setAssignInputs('₹499 Plan', 15000, 30)"><b>₹499 Plan</b><br><span style="font-size:10px; color:#10b981;">15K Cr / 30D</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setAssignInputs('Bonus Credits', 1000, 10)"><b>🎁 +1,000 Cr</b><br><span style="font-size:10px; color:#10b981;">+10 Days</span></button>
+          <button class="chip-btn" style="padding:10px 6px; text-align:center; font-size:12px;" onclick="setAssignInputs('Bonus Credits', 5000, 30)"><b>🎁 +5,000 Cr</b><br><span style="font-size:10px; color:#10b981;">Bonus Gift</span></button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:10px; margin-bottom:16px;">
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#94a3b8; display:block; margin-bottom:4px;">Plan Name</label>
+            <input type="text" id="modalAssignPlanName" class="search-input" value="₹299 Plan (8,000 Credits)" placeholder="₹299 Plan">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#94a3b8; display:block; margin-bottom:4px;">Add Credits</label>
+            <input type="number" id="modalAssignCredits" class="search-input" value="8000" placeholder="8000">
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:#94a3b8; display:block; margin-bottom:4px;">Days</label>
+            <input type="number" id="modalAssignDays" class="search-input" value="30" placeholder="30">
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px; background:#0f172a; padding:10px; border-radius:6px; border:1px solid #334155;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+            <input type="checkbox" id="modalAssignSendChatMsg" checked style="accent-color:#10b981; width:16px; height:16px;">
+            <span>💬 Send Confirmation & Celebration Card in Chat</span>
+          </label>
+        </div>
+
+        <button class="flat-btn btn-success" id="btnExecuteDirectAssign" onclick="submitDirectPlanAssignInDb()" style="width:100%; justify-content:center; padding:12px; font-size:13px; font-weight:800; background:linear-gradient(135deg,#10b981,#059669);">
+          ⚡ Instant Activate in DB & Notify User 🎉
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://pgxrlvalrgstmxyeeqso.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_yRBKTItw2T5dlxYVTgG98Q_fdwP8kck";
+    
+    let adminPassword = '';
+    let allMessages = [];
+    let conversations = [];
+    let activeUserEmail = null;
+    let usersDataMap = {};
+
+    // Password Unlock
+    const pwScreen = document.getElementById('pwScreen');
+    const mainApp = document.getElementById('mainApp');
+    const pwInput = document.getElementById('pwInput');
+    const pwBtn = document.getElementById('pwBtn');
+    const pwError = document.getElementById('pwError');
+
+    pwBtn.addEventListener('click', attemptLogin);
+    pwInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptLogin(); });
+
+    // Auto-login if already logged in admin dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedPw = sessionStorage.getItem('admin_dash_pw');
+      if (savedPw) {
+        pwInput.value = savedPw;
+        attemptLogin();
+      }
+    });
+
+    async function attemptLogin() {
+      const pass = pwInput.value.trim();
+      if (!pass) { pwError.textContent = '⚠️ Password required!'; return; }
+      
+      pwError.textContent = '⏳ Verifying...';
+      pwBtn.disabled = true;
+
+      // Direct check for 9001113382
+      if (pass === '9001113382') {
+        adminPassword = pass;
+        sessionStorage.setItem('admin_dash_pw', pass);
+        pwScreen.style.display = 'none';
+        mainApp.style.display = 'flex';
+        initChatPortal();
+        return;
+      }
+
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/send_admin_message', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: pass, p_user_email: 'test@test.com', p_message: '__auth_test__' })
+        });
+        const data = await res.json();
+        
+        if (data === 'DENIED') {
+          pwError.textContent = '❌ Galat password!';
+          pwBtn.disabled = false;
+          return;
+        }
+
+        // Clean up test auth message
+        try {
+          await fetch(SUPABASE_URL + '/rest/v1/chat_messages?user_email=eq.test@test.com&message=eq.__auth_test__', {
+            method: 'DELETE',
+            headers: { 'apikey': SUPABASE_KEY }
+          });
+        } catch(e){}
+
+        adminPassword = pass;
+        sessionStorage.setItem('admin_dash_pw', pass);
+        pwScreen.style.display = 'none';
+        mainApp.style.display = 'flex';
+        initChatPortal();
+      } catch (err) {
+        // Fallback grant if network/RPC variation
+        adminPassword = pass;
+        sessionStorage.setItem('admin_dash_pw', pass);
+        pwScreen.style.display = 'none';
+        mainApp.style.display = 'flex';
+        initChatPortal();
+      }
+    }
+
+    let allRegisteredUsers = [];
+
+    function initChatPortal() {
+      loadAllChats();
+      loadUsersInfo();
+      setInterval(loadAllChats, 4000); // Polling every 4 seconds
+    }
+
+    async function loadUsersInfo() {
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/users?select=email,credits,plan,expiry_date,next_plan', {
+          headers: { 'apikey': SUPABASE_KEY }
+        });
+        const users = await res.json();
+        if (Array.isArray(users)) {
+          allRegisteredUsers = users;
+          users.forEach(u => { 
+            if (u.email) usersDataMap[u.email.toLowerCase()] = u; 
+          });
+          renderUserList();
+        }
+      } catch(e) { console.error('Error fetching users info:', e); }
+    }
+
+    function startChatFromSearch() {
+      const search = (document.getElementById('userSearchInput').value || '').toLowerCase().trim();
+      if (!search) {
+        alert('Pehle user ki email enter karein!');
+        return;
+      }
+      selectUserChat(search);
+    }
+
+    async function loadAllChats() {
+      try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?order=created_at.desc&limit=500', {
+          headers: { 'apikey': SUPABASE_KEY }
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          allMessages = data;
+          groupConversations();
+          renderUserList();
+          if (activeUserEmail) {
+            renderMessagesStream(activeUserEmail);
+          }
+        }
+      } catch(e) {
+        console.error('Error loading chat messages:', e);
+      }
+    }
+
+    function groupConversations() {
+      const convMap = {};
+      allMessages.forEach(m => {
+        const email = (m.user_email || '').toLowerCase().trim();
+        if (!email || email === 'test@test.com') return;
+        if (!convMap[email]) {
+          convMap[email] = {
+            email: email,
+            lastMessage: m.message || '',
+            lastTime: m.created_at,
+            unreadCount: 0
+          };
+        }
+        if (m.sender === 'user' && m.is_read === false) {
+          convMap[email].unreadCount++;
+        }
+      });
+      conversations = Object.values(convMap);
+      conversations.sort((a, b) => new Date(b.lastTime) - new Date(a.lastTime));
+    }
+
+    function renderUserList() {
+      const container = document.getElementById('usersListContainer');
+      const search = (document.getElementById('userSearchInput').value || '').toLowerCase().trim();
+      const filtered = conversations.filter(c => c.email.includes(search));
+
+      let html = '';
+
+      if (filtered.length > 0) {
+        filtered.forEach(c => {
+          const isActive = c.email === activeUserEmail;
+          const initial = c.email.charAt(0).toUpperCase();
+          const time = new Date(c.lastTime);
+          const timeStr = time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+          
+          let cleanMsg = (c.lastMessage || '').replace(/\[IMG\][\s\S]*?\[\/IMG\]/gi, '📸 Photo');
+          cleanMsg = cleanMsg.replace(/\[PAY:.*?\]/g, '💎 Payment Offer');
+          if (cleanMsg.startsWith('data:image/')) cleanMsg = '📸 Screenshot';
+
+          html += `
+            <div class="user-item ${isActive ? 'active' : ''}" onclick="selectUserChat('${c.email}')">
+              <div class="user-avatar">${initial}</div>
+              <div class="user-info">
+                <div class="user-email-row">
+                  <span class="user-email-text">${escapeHtml(c.email)}</span>
+                  <span class="user-time">${timeStr}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="user-last-msg">${escapeHtml(cleanMsg)}</span>
+                  ${c.unreadCount > 0 ? `<span class="unread-pill">${c.unreadCount}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // If search query is present, check registered users who haven't messaged yet
+      if (search) {
+        const matchingDbUsers = allRegisteredUsers.filter(u => 
+          u.email && u.email.toLowerCase().includes(search) && !conversations.some(c => c.email === u.email.toLowerCase())
+        );
+
+        if (matchingDbUsers.length > 0) {
+          html += `<div style="padding:12px 14px 4px; font-size:10px; font-weight:800; color:#38bdf8; text-transform:uppercase; letter-spacing:0.8px;">👥 Registered Users (New Chat)</div>`;
+          matchingDbUsers.forEach(u => {
+            const uEmail = u.email.toLowerCase();
+            const isActive = uEmail === activeUserEmail;
+            const initial = uEmail.charAt(0).toUpperCase();
+            html += `
+              <div class="user-item ${isActive ? 'active' : ''}" onclick="selectUserChat('${uEmail}')" style="border-left:3px solid #38bdf8; background:rgba(56,189,248,0.04);">
+                <div class="user-avatar" style="background:#0284c7;">${initial}</div>
+                <div class="user-info">
+                  <div class="user-email-row">
+                    <span class="user-email-text" style="color:#7dd3fc;">${escapeHtml(u.email)}</span>
+                    <span class="user-time" style="color:#34d399; font-weight:800;">${(u.credits || 0).toLocaleString()} Cr</span>
+                  </div>
+                  <div style="font-size:11px; color:#94a3b8;">💬 Click karke Chat shuru karein</div>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        // Direct action button to chat with typed query
+        html += `
+          <div style="padding:12px; text-align:center;">
+            <button onclick="selectUserChat('${escapeHtml(search)}')" class="flat-btn btn-primary" style="width:100%; justify-content:center; padding:10px 8px; font-size:11.5px; font-weight:800; background:linear-gradient(135deg,#3b82f6,#2563eb); border-radius:8px; box-shadow:0 4px 12px rgba(59,130,246,0.3);">
+              ➕ Start Chat with "${escapeHtml(search)}"
+            </button>
+          </div>
+        `;
+      }
+
+      if (!html) {
+        html = '<div style="padding:24px 16px;text-align:center;color:var(--text-muted);font-size:12px;">Koi conversation nahi mili.<br><span style="font-size:11px;color:#64748b;margin-top:6px;display:block;">Upar user ki email enter karke "➕ Chat" button dabayein!</span></div>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    document.getElementById('userSearchInput').addEventListener('input', renderUserList);
+    document.getElementById('userSearchInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const search = (e.target.value || '').toLowerCase().trim();
+        if (search) selectUserChat(search);
+      }
+    });
+
+    function selectUserChat(email) {
+      activeUserEmail = email;
+      document.getElementById('emptyChatState').style.display = 'none';
+      const content = document.getElementById('activeChatContent');
+      content.style.display = 'flex';
+      
+      const threadPane = document.getElementById('chatThreadPane');
+      if (threadPane) threadPane.classList.add('mobile-open');
+
+      document.getElementById('activeUserEmailText').textContent = email;
+      
+      const uInfo = usersDataMap[email.toLowerCase()];
+      if (uInfo) {
+        document.getElementById('activeUserCredits').textContent = `${(uInfo.credits || 0).toLocaleString()} Credits`;
+        document.getElementById('activeUserPlan').textContent = uInfo.plan || uInfo.next_plan || 'Active';
+      } else {
+        document.getElementById('activeUserCredits').textContent = 'User Found';
+        document.getElementById('activeUserPlan').textContent = 'Plan Active';
+      }
+
+      renderUserList();
+      renderMessagesStream(email);
+      markAllRead();
+    }
+
+    function closeMobileChat() {
+      const threadPane = document.getElementById('chatThreadPane');
+      if (threadPane) threadPane.classList.remove('mobile-open');
+    }
+
+    function openImageLightbox(src) {
+      const existing = document.getElementById('chatLightbox');
+      if (existing) existing.remove();
+
+      const lightbox = document.createElement('div');
+      lightbox.id = 'chatLightbox';
+      lightbox.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:999999;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:16px;cursor:pointer;animation:modalScaleIn 0.2s ease;';
+      
+      lightbox.innerHTML = `
+        <div style="position:absolute;top:16px;right:20px;background:#ef4444;color:#fff;font-weight:900;font-size:18px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.5);" onclick="this.parentElement.remove()">✕</div>
+        <img src="${src}" style="max-width:96vw;max-height:86vh;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.8);object-fit:contain;" onclick="event.stopPropagation();" />
+        <div style="margin-top:14px;display:flex;gap:10px;">
+          <a href="${src}" target="_blank" download="screenshot.jpg" style="padding:8px 16px;background:#3b82f6;color:#fff;border-radius:6px;text-decoration:none;font-weight:700;font-size:12px;font-family:sans-serif;" onclick="event.stopPropagation();">⬇️ Full Size / Download</a>
+          <button onclick="document.getElementById('chatLightbox').remove()" style="padding:8px 16px;background:#475569;color:#fff;border-radius:6px;border:none;font-weight:700;font-size:12px;cursor:pointer;">✖ Close</button>
+        </div>
+      `;
+      lightbox.addEventListener('click', () => lightbox.remove());
+      document.body.appendChild(lightbox);
+    }
+
+    function renderMessagesStream(email) {
+      const stream = document.getElementById('messagesStream');
+      const userMsgs = allMessages
+        .filter(m => (m.user_email || '').toLowerCase().trim() === email.toLowerCase())
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+      if (userMsgs.length === 0) {
+        stream.innerHTML = '<div style="margin:auto;color:var(--text-muted);font-size:13px;">No messages yet with this user.</div>';
+        return;
+      }
+
+      let html = '';
+      userMsgs.forEach(m => {
+        const isAdmin = m.sender === 'admin';
+        const time = new Date(m.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+        
+        let rawMsg = m.message || '';
+        let imgUrl = m.image_url || '';
+
+        // Check for [IMG]...[/IMG] in message
+        const imgMatch = rawMsg.match(/\[IMG\]([\s\S]*?)\[\/IMG\]/i);
+        if (imgMatch) {
+          imgUrl = imgMatch[1].trim();
+          rawMsg = rawMsg.replace(/\[IMG\][\s\S]*?\[\/IMG\]/gi, '').trim();
+        } else if (!imgUrl && rawMsg.startsWith('data:image/')) {
+          imgUrl = rawMsg.trim();
+          rawMsg = '';
+        }
+
+        let content = escapeHtml(rawMsg);
+
+        // Render images with interactive thumbnail & click-to-zoom lightbox
+        let imgTag = '';
+        if (imgUrl) {
+          imgTag = `<div style="margin-top:8px;">
+            <img src="${imgUrl}" class="chat-img-thumb" style="max-width:100%;max-height:240px;border-radius:8px;cursor:pointer;display:block;border:1px solid rgba(255,255,255,0.2);box-shadow:0 4px 12px rgba(0,0,0,0.3);" onclick="openImageLightbox(this.src)" alt="Screenshot" />
+            <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:4px;">🔍 Click to Zoom / Fullscreen</div>
+          </div>`;
+        }
+
+        // Render payment tags
+        content = content.replace(/\[PAY:(\d+):(\d+)\]/g, (match, price, credits) => {
+          return `<div style="margin-top:6px;padding:10px 14px;background:#1e293b;border:1.5px solid #10b981;border-radius:8px;color:#fff;font-size:13px;box-shadow:0 4px 12px rgba(16,185,129,0.15);"><span style="color:#10b981;font-weight:800;">💳 Plan Offer Sent:</span> <b>₹${price} for ${parseInt(credits).toLocaleString()} Credits</b></div>`;
+        });
+
+        // Render direct assigned plan tags
+        content = content.replace(/\[PLAN_ASSIGNED:(.*?):(\d+)\]/g, (match, planName, credits) => {
+          return `<div style="margin-top:6px;padding:10px 14px;background:#064e3b;border:1.5px solid #34d399;border-radius:8px;color:#fff;font-size:13px;box-shadow:0 4px 12px rgba(52,211,153,0.2);"><span style="color:#6ee7b7;font-weight:800;">🎉 Plan Activated:</span> <b>${escapeHtml(planName)} (+${parseInt(credits).toLocaleString()} Credits)</b></div>`;
+        });
+
+        html += `
+          <div class="msg-group ${isAdmin ? 'admin' : 'user'}">
+            <div class="msg-bubble">${content}${imgTag}</div>
+            <div class="msg-meta">${isAdmin ? '🛡️ Admin' : '👤 User'} • ${time}</div>
+          </div>
+        `;
+      });
+
+      stream.innerHTML = html;
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    async function markAllRead() {
+      if (!activeUserEmail) return;
+      try {
+        await fetch(SUPABASE_URL + '/rest/v1/chat_messages?user_email=eq.' + encodeURIComponent(activeUserEmail) + '&sender=eq.user&is_read=eq.false', {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ is_read: true })
+        });
+      } catch(e) {}
+    }
+
+    // Send reply
+    document.getElementById('btnSendReply').addEventListener('click', sendAdminReply);
+    document.getElementById('adminReplyInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendAdminReply();
+      }
+    });
+
+    async function sendAdminReply() {
+      if (!activeUserEmail) return;
+      const input = document.getElementById('adminReplyInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = '';
+      await sendAdminRawMessage(text);
+    }
+
+    function insertTemplate(str) {
+      const input = document.getElementById('adminReplyInput');
+      input.value = str;
+      input.focus();
+    }
+
+    // ===== 💎 PLAN MODAL & CHAT SENDER CONTROLS =====
+    function openAdminChatPlanModal() {
+      if (!activeUserEmail) {
+        alert('⚠️ Pehle left panel se koi user select karein!');
+        return;
+      }
+      const modal = document.getElementById('adminChatPlanModal');
+      document.getElementById('modalTargetEmailText').textContent = activeUserEmail;
+      
+      const uInfo = usersDataMap[activeUserEmail.toLowerCase()];
+      if (uInfo) {
+        document.getElementById('modalTargetCurrentStats').textContent = `Current: ${(uInfo.credits || 0).toLocaleString()} Cr | ${uInfo.plan || 'Active'}`;
+      } else {
+        document.getElementById('modalTargetCurrentStats').textContent = '';
+      }
+
+      switchPlanModalTab('offer');
+      modal.style.display = 'flex';
+    }
+
+    function closeAdminChatPlanModal() {
+      const modal = document.getElementById('adminChatPlanModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function switchPlanModalTab(tab) {
+      const tabOffer = document.getElementById('planTabOffer');
+      const tabAssign = document.getElementById('planTabAssign');
+      const btnOffer = document.getElementById('tabBtnSendOffer');
+      const btnAssign = document.getElementById('tabBtnDirectAssign');
+
+      if (tab === 'offer') {
+        tabOffer.style.display = 'block';
+        tabAssign.style.display = 'none';
+        btnOffer.style.background = '#3b82f6';
+        btnOffer.style.color = '#fff';
+        btnAssign.style.background = 'transparent';
+        btnAssign.style.color = '#94a3b8';
+      } else {
+        tabOffer.style.display = 'none';
+        tabAssign.style.display = 'block';
+        btnAssign.style.background = '#10b981';
+        btnAssign.style.color = '#fff';
+        btnOffer.style.background = 'transparent';
+        btnOffer.style.color = '#94a3b8';
+      }
+    }
+
+    function setOfferInputs(price, credits) {
+      document.getElementById('modalOfferPrice').value = price;
+      document.getElementById('modalOfferCredits').value = credits;
+    }
+
+    function setAssignInputs(planName, credits, days) {
+      document.getElementById('modalAssignPlanName').value = planName;
+      document.getElementById('modalAssignCredits').value = credits;
+      document.getElementById('modalAssignDays').value = days;
+    }
+
+    // 1-Click quick send offer from chips
+    async function quickSendPayOffer(price, credits) {
+      if (!activeUserEmail) {
+        alert('⚠️ Pehle left panel se koi user select karein!');
+        return;
+      }
+      const planString = `₹${price} Plan (${credits.toLocaleString()} Credits)`;
+      await setNextPlanInDb(activeUserEmail, planString);
+      const payTag = `[PAY:${price}:${credits}]`;
+      await sendAdminRawMessage(payTag);
+    }
+
+    async function submitSendPlanOfferInChat() {
+      if (!activeUserEmail) return;
+      const price = parseInt(document.getElementById('modalOfferPrice').value, 10) || 299;
+      const credits = parseInt(document.getElementById('modalOfferCredits').value, 10) || 12000;
+      
+      closeAdminChatPlanModal();
+      const planString = `₹${price} Plan (${credits.toLocaleString()} Credits)`;
+      await setNextPlanInDb(activeUserEmail, planString);
+      const payTag = `[PAY:${price}:${credits}]`;
+      await sendAdminRawMessage(payTag);
+    }
+
+    async function setNextPlanInDb(email, planString) {
+      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '9001113382';
+      try {
+        await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_plan', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: pw, p_user_email: email, p_plan: planString })
+        });
+        await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email), {
+          method: 'PATCH',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ next_plan: planString })
+        });
+      } catch(e) {
+        console.warn('Set next plan error:', e);
+      }
+    }
+
+    async function sendAdminRawMessage(msgText) {
+      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '9001113382';
+      let sentSuccess = false;
+
+      try {
+        // Step 1: Use Supabase RPC send_admin_message (bypasses RLS with admin password)
+        const rpcRes = await fetch(SUPABASE_URL + '/rest/v1/rpc/send_admin_message', {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            p_password: pw,
+            p_user_email: activeUserEmail,
+            p_message: msgText
+          })
+        });
+
+        if (rpcRes.ok) {
+          const rpcData = await rpcRes.json().catch(() => null);
+          if (rpcData !== 'DENIED') {
+            sentSuccess = true;
+          }
+        }
+        
+        // Step 2: Fallback to direct POST if RPC not available
+        if (!sentSuccess) {
+          const directRes = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+              user_email: activeUserEmail,
+              sender: 'admin',
+              message: msgText,
+              is_read: true
+            })
+          });
+          if (directRes.ok) sentSuccess = true;
+        }
+
+        if (sentSuccess) {
+          await loadAllChats();
+        } else {
+          alert('❌ Message send error! Password check karein ya refresh karein.');
+        }
+      } catch(e) {
+        console.error('Send message error:', e);
+        alert('❌ Network error: ' + e.message);
+      }
+    }
+
+    // ⚡ Direct Activate Plan / Credits in DB
+    async function submitDirectPlanAssignInDb() {
+      if (!activeUserEmail) return;
+      const btn = document.getElementById('btnExecuteDirectAssign');
+      const planName = document.getElementById('modalAssignPlanName').value.trim() || '₹299 Plan';
+      const creditsToAdd = parseInt(document.getElementById('modalAssignCredits').value, 10) || 0;
+      const daysToAdd = parseInt(document.getElementById('modalAssignDays').value, 10) || 30;
+      const sendMsg = document.getElementById('modalAssignSendChatMsg').checked;
+      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '9001113382';
+
+      btn.disabled = true;
+      btn.textContent = '⏳ Activating in Database...';
+
+      try {
+        // 1. Fetch current user state
+        const getRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(activeUserEmail) + '&select=*', {
+          headers: { 'apikey': SUPABASE_KEY }
+        });
+        const users = await getRes.json();
+        const user = Array.isArray(users) && users.length > 0 ? users[0] : null;
+
+        const currentCredits = user ? (user.credits || 0) : 0;
+        const newCredits = currentCredits + creditsToAdd;
+
+        // Calculate new expiry date
+        const baseDate = (user && user.expiry_date && new Date(user.expiry_date) > new Date()) 
+          ? new Date(user.expiry_date) 
+          : new Date();
+        baseDate.setDate(baseDate.getDate() + daysToAdd);
+        const newExpiryStr = baseDate.toISOString();
+
+        // 2. Direct PATCH to users table
+        await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(activeUserEmail), {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({
+            credits: newCredits,
+            plan: planName,
+            next_plan: planName,
+            expiry_date: newExpiryStr,
+            is_disabled: false
+          })
+        });
+
+        // 3. Also invoke RPC admin_set_user_plan
+        try {
+          await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_plan', {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_password: pw, p_user_email: activeUserEmail, p_plan: planName })
+          });
+        } catch(e){}
+
+        // 4. Also invoke RPC admin_set_user_credits
+        try {
+          await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_credits', {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_password: pw, p_user_email: activeUserEmail, p_credits: newCredits })
+          });
+        } catch(e){}
+
+        // 5. Send Confirmation in Chat if selected
+        if (sendMsg) {
+          const assignCard = `[PLAN_ASSIGNED:${planName}:${creditsToAdd}]`;
+          await sendAdminRawMessage(assignCard);
+        }
+
+        alert(`🎉 SUCCESS!\n\n"${activeUserEmail}" ke account mein:\n• Plan: ${planName}\n• +${creditsToAdd.toLocaleString()} Credits (New Balance: ${newCredits.toLocaleString()})\n• Validity: +${daysToAdd} Days\nActivate ho gaya hai!`);
+        closeAdminChatPlanModal();
+        await loadUsersInfo();
+        if (activeUserEmail) {
+          selectUserChat(activeUserEmail);
+        }
+      } catch(err) {
+        alert('❌ Error activating plan: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '⚡ Instant Activate in DB & Notify User 🎉';
+      }
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str || '';
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
