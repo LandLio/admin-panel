@@ -511,6 +511,46 @@
         -webkit-overflow-scrolling: touch !important;
       }
     }
+    /* ===== USERS TABLE → CARD LAYOUT ON MOBILE ===== */
+    @media (max-width: 760px) {
+      #allUsersTable { overflow-x: visible !important; }
+      .user-table thead { display: none; }
+      .user-table, .user-table tbody, .user-table tr, .user-table td {
+        display: block;
+        width: 100%;
+      }
+      .user-table tr {
+        margin-bottom: 12px;
+        border: 1px solid var(--flat-border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: var(--flat-card);
+      }
+      .user-table td {
+        padding: 7px 0 !important;
+        border-bottom: 1px dashed rgba(255,255,255,0.08);
+        white-space: normal !important;
+        font-size: 12.5px !important;
+      }
+      .user-table td:last-child { border-bottom: none; }
+      .user-table td[data-label]:not([data-label=""])::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 9.5px;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+      }
+      .user-table td[data-label=""] {
+        padding-bottom: 10px !important;
+        margin-bottom: 4px;
+        border-bottom: 1px solid var(--flat-border-light);
+        font-size: 13.5px !important;
+      }
+      .user-table select { min-width: 0 !important; }
+    }
     .pw-screen {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -902,6 +942,12 @@
             <input type="email" id="singleEmail" placeholder="user@gmail.com" style="width:200px;padding:8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#eaeaf5;font-size:12px;outline:none;">
             <input type="number" id="singleCredits" placeholder="500" min="1" style="width:80px;padding:8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#00e094;font-size:13px;font-weight:700;outline:none;">
             <button id="singleGiveBtn" style="padding:8px 16px;background:linear-gradient(135deg,#7c6aff,#a395ff);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">💰 Credits Do</button>
+          </div>
+          <!-- Add New User -->
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">
+            <span style="font-size:12px;color:#8888aa;">➕ Naya user add karo:</span>
+            <input type="email" id="newUserEmail" placeholder="newuser@gmail.com" style="width:220px;padding:8px;background:#0a0a1a;border:1px solid rgba(0,224,148,0.2);border-radius:8px;color:#eaeaf5;font-size:12px;outline:none;">
+            <button id="addNewUserBtn" style="padding:8px 16px;background:linear-gradient(135deg,#00e094,#00b377);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">➕ Add (1000 Cr / 10 Din, Renewal ₹299→8000 Cr)</button>
           </div>
         </div>
       </div>
@@ -2156,41 +2202,29 @@
         const isHid = u.hid_upload_enabled !== false;
         const isSpeedBoost = u.speed_boost_enabled === true;
 
-        html += '<tr' + rowStyle + '><td><strong>' + escapeHtml(u.email) + '</strong>' + ihmsInfoHtml + '</td>' +
-          '<td>' + refInfoHtml + '</td>' +
-          '<td>' + planButtonHtml + '</td>' +
-          '<td style="cursor:pointer;" onclick="openCreditEditModal(\'' + safeEmailStr + '\', ' + (u.credits || 0) + ')" title="Click karke Current Balance Set / Add karein"><strong style="color:#00e094;font-size:13px;">' + (u.credits || 0).toLocaleString() + '</strong> <span style="font-size:11px;color:#00f0ff;margin-left:4px;cursor:pointer;">✏️</span></td>' +
-          '<td style="cursor:pointer;" onclick="openExpiryEditModal(\'' + safeEmailStr + '\', \'' + (u.expiry_date || '') + '\')" title="Click karke Expiry Date Set / Change karein"><span style="color:#ffd700;font-weight:700;font-size:12px;">' + expiryStr + '</span> <span style="font-size:11px;color:#00f0ff;margin-left:4px;cursor:pointer;">✏️</span></td>' +
-          '<td>' + statusBadge + '</td>' +
-          '<td style="white-space:nowrap;">' +
-            '<button onclick="openIhmsResetModal(\'' + safeEmailStr + '\')" style="padding:4px 8px;background:linear-gradient(135deg,rgba(0,240,255,0.15),rgba(0,224,148,0.15));border:1px solid #00f0ff;color:#00f0ff;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer;margin-right:4px;" title="Reset IHMS Hospital ID, Store ID, Store Name & Username Lock">🏥 IHMS</button>' +
-            '<button onclick="openDeviceResetModal(\'' + safeEmailStr + '\')" style="padding:4px 8px;background:linear-gradient(135deg,rgba(124,106,255,0.18),rgba(0,240,255,0.18));border:1px solid #9d8cff;color:#9d8cff;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer;margin-right:4px;" title="Device Lock & Multi-PC Manager">💻 Device</button>' +
-            '<button onclick="viewUserCreditUsage(\'' + escapeHtml(u.email) + '\')" style="padding:4px 8px;background:linear-gradient(135deg,rgba(0,240,255,0.15),rgba(124,106,255,0.15));border:1px solid rgba(0,240,255,0.5);color:#00f0ff;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer;margin-right:4px;" title="Day-Wise Credit Usage List">📊 Logs</button>' +
-            '<button onclick="toggleUser(\'' + escapeHtml(u.email) + '\',' + !isDisabled + ')" style="padding:4px 8px;' + toggleBtnStyle + 'border-radius:6px;font-size:10px;cursor:pointer;margin-right:4px;" title="On/Off Toggle">' + toggleLabel + '</button>' +
-            '<button onclick="toggleUserPro(\'' + safeEmailStr + '\',' + !isPro + ')" style="padding:4px 8px;background:' + (isPro ? 'rgba(240,160,48,0.18)' : 'rgba(255,77,109,0.08)') + ';border:1px solid ' + (isPro ? '#f0a030' : 'rgba(255,77,109,0.3)') + ';color:' + (isPro ? '#f0a030' : '#ff4d6d') + ';border-radius:6px;font-size:10px;cursor:pointer;margin-right:4px;" title="Is user ke liye PRO USER Mode ON/OFF">' +
-            '<span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;">' +
-            '<span style="display:inline-block;width:24px;height:12px;border-radius:6px;background:' + (isPro ? '#f0a030' : '#555') + ';position:relative;transition:all 0.3s;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;position:absolute;top:2px;' + (isPro ? 'right:2px' : 'left:2px') + ';transition:all 0.3s;"></span></span>' +
-            '⚡ PRO</span></button>' +
-            '<button onclick="toggleUserTabs(\'' + safeEmailStr + '\',' + !isTabs + ')" style="padding:4px 8px;background:' + (isTabs ? 'rgba(0,240,255,0.15)' : 'rgba(255,77,109,0.08)') + ';border:1px solid ' + (isTabs ? '#00f0ff' : 'rgba(255,77,109,0.3)') + ';color:' + (isTabs ? '#00f0ff' : '#ff4d6d') + ';border-radius:6px;font-size:10px;cursor:pointer;margin-right:4px;" title="Is user ke liye Worker Tabs Mode ON/OFF">' +
-            '<span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;">' +
-            '<span style="display:inline-block;width:24px;height:12px;border-radius:6px;background:' + (isTabs ? '#00f0ff' : '#555') + ';position:relative;transition:all 0.3s;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;position:absolute;top:2px;' + (isTabs ? 'right:2px' : 'left:2px') + ';transition:all 0.3s;"></span></span>' +
-            '🖥️ Tabs</span></button>' +
-            '<button onclick="toggleUserHid(\'' + safeEmailStr + '\',' + !isHid + ')" style="padding:4px 8px;background:' + (isHid ? 'rgba(124,106,255,0.18)' : 'rgba(255,77,109,0.08)') + ';border:1px solid ' + (isHid ? '#9d8cff' : 'rgba(255,77,109,0.3)') + ';color:' + (isHid ? '#9d8cff' : '#ff4d6d') + ';border-radius:6px;font-size:10px;cursor:pointer;margin-right:4px;" title="Is user ke liye HID List & Upload Mode ON/OFF">' +
-            '<span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;">' +
-            '<span style="display:inline-block;width:24px;height:12px;border-radius:6px;background:' + (isHid ? '#7c6aff' : '#555') + ';position:relative;transition:all 0.3s;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;position:absolute;top:2px;' + (isHid ? 'right:2px' : 'left:2px') + ';transition:all 0.3s;"></span></span>' +
-            '📋 HID List</span></button>' +
-            '<button onclick="toggleSmartBulk(\'' + safeEmailStr + '\',' + !(u.smart_bulk_enabled) + ')" style="padding:4px 8px;background:' + (u.smart_bulk_enabled ? 'rgba(0,224,148,0.15)' : 'rgba(255,77,109,0.08)') + ';border:1px solid ' + (u.smart_bulk_enabled ? '#00e094' : 'rgba(255,77,109,0.3)') + ';color:' + (u.smart_bulk_enabled ? '#00e094' : '#ff4d6d') + ';border-radius:6px;font-size:10px;cursor:pointer;margin-right:4px;" title="Smart Bulk ON/OFF">' +
-            '<span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;">' +
-            '<span style="display:inline-block;width:24px;height:12px;border-radius:6px;background:' + (u.smart_bulk_enabled ? '#00e094' : '#555') + ';position:relative;transition:all 0.3s;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;position:absolute;top:2px;' + (u.smart_bulk_enabled ? 'right:2px' : 'left:2px') + ';transition:all 0.3s;"></span></span>' +
-            '🎯 Bulk</span></button>' +
-            '<button onclick="toggleSpeedBoost(\'' + safeEmailStr + '\',' + !isSpeedBoost + ')" style="padding:4px 8px;background:' + (isSpeedBoost ? 'rgba(255,71,87,0.18)' : 'rgba(255,77,109,0.08)') + ';border:1px solid ' + (isSpeedBoost ? '#ff4757' : 'rgba(255,77,109,0.3)') + ';color:' + (isSpeedBoost ? '#ff4757' : '#ff4d6d') + ';border-radius:6px;font-size:10px;cursor:pointer;margin-right:4px;" title="Speed Boost ON/OFF — Stock report mein random multiplied data dikhaye">' +
-            '<span style="display:inline-flex;align-items:center;gap:4px;font-weight:800;">' +
-            '<span style="display:inline-block;width:24px;height:12px;border-radius:6px;background:' + (isSpeedBoost ? '#ff4757' : '#555') + ';position:relative;transition:all 0.3s;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#fff;position:absolute;top:2px;' + (isSpeedBoost ? 'right:2px' : 'left:2px') + ';transition:all 0.3s;"></span></span>' +
-            '🚀 SB</span></button>' +
-            '<button onclick="openHidCostModal(\'' + safeEmailStr + '\')" style="padding:4px 8px;background:linear-gradient(135deg,rgba(255,179,71,0.15),rgba(255,77,109,0.15));border:1px solid rgba(255,179,71,0.5);color:#ffb347;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer;margin-right:4px;" title="Per-HID Credit Cost Set Karein (Manual + Bulk)">⚡ HID</button>' +
-            '<button onclick="openSpeedModal(\'' + safeEmailStr + '\')" style="padding:4px 8px;background:linear-gradient(135deg,rgba(0,224,148,0.15),rgba(0,240,255,0.15));border:1px solid #00e094;color:#00e094;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer;margin-right:4px;" title="Direct Server Entry Speed / Wait Time Adjust Karein">⏱️ Speed</button>' +
-            '<button onclick="adminGrantBonus(\'' + escapeHtml(u.email) + '\')" style="padding:4px 8px;background:linear-gradient(135deg,rgba(0,224,148,0.18),rgba(0,240,255,0.18));border:1px solid #00e094;color:#00e094;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer;margin-right:4px;" title="Manual Grant (+10 Days Validity & +1,000 Credits)">🎁 +10D & +1K</button>' +
-            '<button onclick="fillUserBannerEmail(\'' + escapeHtml(u.email) + '\')" style="padding:4px 8px;background:rgba(255,179,71,0.1);border:1px solid rgba(255,179,71,0.3);color:#ffb347;border-radius:6px;font-size:10px;cursor:pointer;" title="Send Banner">📢</button>' +
+        html += '<tr' + rowStyle + '><td data-label=""><strong>' + escapeHtml(u.email) + '</strong>' + ihmsInfoHtml + '</td>' +
+          '<td data-label="🎟️ Referral">' + refInfoHtml + '</td>' +
+          '<td data-label="🎯 Next Plan">' + planButtonHtml + '</td>' +
+          '<td data-label="💰 Credits" style="cursor:pointer;" onclick="openCreditEditModal(\'' + safeEmailStr + '\', ' + (u.credits || 0) + ')" title="Click karke Current Balance Set / Add karein"><strong style="color:#00e094;font-size:13px;">' + (u.credits || 0).toLocaleString() + '</strong> <span style="font-size:11px;color:#00f0ff;margin-left:4px;cursor:pointer;">✏️</span></td>' +
+          '<td data-label="📅 Expiry" style="cursor:pointer;" onclick="openExpiryEditModal(\'' + safeEmailStr + '\', \'' + (u.expiry_date || '') + '\')" title="Click karke Expiry Date Set / Change karein"><span style="color:#ffd700;font-weight:700;font-size:12px;">' + expiryStr + '</span> <span style="font-size:11px;color:#00f0ff;margin-left:4px;cursor:pointer;">✏️</span></td>' +
+          '<td data-label="📶 Status">' + statusBadge + '</td>' +
+          '<td data-label="⚙️ Action" style="white-space:nowrap;">' +
+            '<select onchange="runUserAction(this, \'' + safeEmailStr + '\')" style="width:100%;min-width:180px;padding:7px 8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.35);border-radius:6px;color:#eaeaf5;font-size:11px;font-weight:600;cursor:pointer;outline:none;">' +
+              '<option value="" selected disabled>⚙️ Action Chuno...</option>' +
+              '<option value="ihms">🏥 IHMS Lock Reset</option>' +
+              '<option value="device">💻 Device / Multi-PC Manager</option>' +
+              '<option value="logs">📊 Credit Usage Logs</option>' +
+              '<option value="toggle_user">' + (isDisabled ? '✅ User ko ON karo' : '❌ User ko OFF karo') + '</option>' +
+              '<option value="toggle_pro">' + (isPro ? '⚡ PRO Mode OFF karo' : '⚡ PRO Mode ON karo') + '</option>' +
+              '<option value="toggle_tabs">' + (isTabs ? '🖥️ Worker Tabs OFF karo' : '🖥️ Worker Tabs ON karo') + '</option>' +
+              '<option value="toggle_hid">' + (isHid ? '📋 HID List OFF karo' : '📋 HID List ON karo') + '</option>' +
+              '<option value="toggle_bulk">' + (u.smart_bulk_enabled ? '🎯 Smart Bulk OFF karo' : '🎯 Smart Bulk ON karo') + '</option>' +
+              '<option value="toggle_speedboost">' + (isSpeedBoost ? '🚀 Speed Boost OFF karo' : '🚀 Speed Boost ON karo') + '</option>' +
+              '<option value="hid_cost">⚡ HID Credit Cost Set</option>' +
+              '<option value="speed">⏱️ Speed Settings</option>' +
+              '<option value="grant_bonus">🎁 +10 Din & +1,000 Credits Grant</option>' +
+              '<option value="banner">📢 Banner Bhejo</option>' +
+            '</select>' +
           '</td></tr>';
       });
       html += '</tbody></table>';
@@ -2198,6 +2232,36 @@
     }
 
     function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text || ''; return d.innerHTML; }
+
+    // ===== ACTIONS DROPDOWN DISPATCHER =====
+    function runUserAction(selectEl, email) {
+      const action = selectEl.value;
+      selectEl.value = ''; // reset dropdown to placeholder after firing action
+      const u = allUsers.find(x => x.email === email);
+      if (!u) return;
+
+      const isDisabled = u.is_disabled === true;
+      const isPro = u.pro_user_enabled !== false;
+      const isTabs = u.ihms_tabs_enabled !== false;
+      const isHid = u.hid_upload_enabled !== false;
+      const isSpeedBoost = u.speed_boost_enabled === true;
+
+      switch (action) {
+        case 'ihms': openIhmsResetModal(email); break;
+        case 'device': openDeviceResetModal(email); break;
+        case 'logs': viewUserCreditUsage(email); break;
+        case 'toggle_user': toggleUser(email, !isDisabled); break;
+        case 'toggle_pro': toggleUserPro(email, !isPro); break;
+        case 'toggle_tabs': toggleUserTabs(email, !isTabs); break;
+        case 'toggle_hid': toggleUserHid(email, !isHid); break;
+        case 'toggle_bulk': toggleSmartBulk(email, !u.smart_bulk_enabled); break;
+        case 'toggle_speedboost': toggleSpeedBoost(email, !isSpeedBoost); break;
+        case 'hid_cost': openHidCostModal(email); break;
+        case 'speed': openSpeedModal(email); break;
+        case 'grant_bonus': adminGrantBonus(email); break;
+        case 'banner': fillUserBannerEmail(email); break;
+      }
+    }
 
     // ===== MANUAL PLAN SELECTOR MODAL & UPDATE =====
     let currentModalEmail = '';
@@ -3550,6 +3614,63 @@
       await giveCreditsSingle(email, credits);
       document.getElementById('singleEmail').value = '';
       document.getElementById('singleCredits').value = '';
+    });
+
+    // ===== ➕ ADD NEW USER (1000 Credits / 10 Din / Renewal ₹299 → 8000 Credits) =====
+    document.getElementById('addNewUserBtn').addEventListener('click', async () => {
+      const emailInput = document.getElementById('newUserEmail');
+      const email = emailInput.value.trim().toLowerCase();
+      if (!email) { alert('⚠️ Email daalo!'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('⚠️ Valid email daalo!'); return; }
+
+      const btn = document.getElementById('addNewUserBtn');
+      btn.disabled = true; btn.textContent = '⏳ Adding...';
+
+      try {
+        const payload = {
+          email: email,
+          credits: 1000,
+          plan: '299',
+          next_plan: '299',
+          status: 'active',
+          payment_status: 'paid',
+          expiry_date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString()
+        };
+
+        // Check if this email already has a row
+        const checkRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email) + '&select=id', {
+          headers: { 'apikey': SUPABASE_KEY }
+        });
+        const existing = await checkRes.json();
+
+        let res;
+        if (Array.isArray(existing) && existing.length > 0) {
+          res = await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email), {
+            method: 'PATCH',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          res = await fetch(SUPABASE_URL + '/rest/v1/users', {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+            body: JSON.stringify(payload)
+          });
+        }
+
+        if (res.ok) {
+          alert('✅ "' + email + '" add ho gaya!\n\n💰 1000 Credits\n📅 10 Din Validity\n🔁 Renewal par: ₹299 Plan (8000 Credits)');
+          emailInput.value = '';
+          await loadDashboard();
+        } else {
+          const errText = await res.text();
+          alert('❌ Failed: ' + errText);
+        }
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      } finally {
+        btn.disabled = false; btn.textContent = '➕ Add (1000 Cr / 10 Din, Renewal ₹299→8000 Cr)';
+      }
     });
 
     // ===== 📊 DAY-WISE CREDIT USAGE VIEWER (LAST 7 DAYS) =====

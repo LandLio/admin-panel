@@ -551,6 +551,37 @@
       .quick-bar {
         padding: 6px 10px;
       }
+      .chat-user-stats {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .search-box {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .plan-modal-box {
+        padding: 16px !important;
+        width: 100% !important;
+      }
+      .plan-modal-box div[style*="grid-template-columns:repeat(3, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .plan-modal-box div[style*="grid-template-columns:1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+      .plan-modal-box div[style*="grid-template-columns:1.2fr 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+      .chat-user-details {
+        gap: 8px !important;
+      }
+      .chat-header {
+        flex-wrap: wrap;
+        height: auto !important;
+        padding: 8px 10px !important;
+      }
     }
   </style>
 </head>
@@ -579,7 +610,7 @@
         <span class="nav-badge" id="onlineBadge">LIVE FEED</span>
       </div>
       <div class="nav-actions">
-        <a href="admin.html" class="flat-btn btn-secondary">📊 Dashboard</a>
+        <a href="admin-dashboard.html" class="flat-btn btn-secondary">📊 Dashboard</a>
         <button class="flat-btn btn-primary" onclick="loadAllChats()">🔄 Refresh</button>
       </div>
     </header>
@@ -656,8 +687,8 @@
   </div>
 
   <!-- Plan Manager Modal in Admin Chat -->
-  <div id="adminChatPlanModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;">
-    <div style="background:#1e293b; border:2px solid #3b82f6; border-radius:12px; width:480px; max-width:92vw; padding:24px; color:#f8fafc; font-family:'Inter',sans-serif; box-shadow:0 20px 50px rgba(0,0,0,0.7);">
+  <div id="adminChatPlanModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center; padding:12px;">
+    <div class="plan-modal-box" style="background:#1e293b; border:2px solid #3b82f6; border-radius:12px; width:480px; max-width:92vw; max-height:90vh; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:24px; color:#f8fafc; font-family:'Inter',sans-serif; box-shadow:0 20px 50px rgba(0,0,0,0.7);">
       
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #334155; padding-bottom:12px;">
         <div style="font-family:'Outfit',sans-serif; font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
@@ -1064,27 +1095,59 @@
         const time = new Date(m.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
         
         let rawMsg = m.message || '';
-        let imgUrl = m.image_url || '';
+        let imgUrls = [];
 
-        // Check for [IMG]...[/IMG] in message
-        const imgMatch = rawMsg.match(/\[IMG\]([\s\S]*?)\[\/IMG\]/i);
-        if (imgMatch) {
-          imgUrl = imgMatch[1].trim();
-          rawMsg = rawMsg.replace(/\[IMG\][\s\S]*?\[\/IMG\]/gi, '').trim();
-        } else if (!imgUrl && rawMsg.startsWith('data:image/')) {
-          imgUrl = rawMsg.trim();
+        // 1. Direct image_url property
+        if (m.image_url && typeof m.image_url === 'string' && m.image_url.trim()) {
+          imgUrls.push(m.image_url.trim());
+        }
+
+        // 2. Extract [IMG]...[/IMG] or [img]...[/img] tags
+        const imgMatches = [...rawMsg.matchAll(/\[img\]([\s\S]*?)\[\/img\]/gi)];
+        if (imgMatches.length > 0) {
+          imgMatches.forEach(match => {
+            if (match[1] && match[1].trim()) {
+              imgUrls.push(match[1].trim());
+            }
+          });
+          rawMsg = rawMsg.replace(/\[img\][\s\S]*?\[\/img\]/gi, '').trim();
+        }
+
+        // 3. Extract markdown images ![alt](url)
+        const mdImgMatches = [...rawMsg.matchAll(/!\[.*?\]\((.*?)\)/g)];
+        if (mdImgMatches.length > 0) {
+          mdImgMatches.forEach(match => {
+            if (match[1] && match[1].trim()) {
+              imgUrls.push(match[1].trim());
+            }
+          });
+          rawMsg = rawMsg.replace(/!\[.*?\]\(.*?\)/g, '').trim();
+        }
+
+        // 4. Raw base64 data URL as whole message
+        if (rawMsg.startsWith('data:image/')) {
+          imgUrls.push(rawMsg.trim());
           rawMsg = '';
         }
+
+        // Deduplicate
+        imgUrls = [...new Set(imgUrls)];
 
         let content = escapeHtml(rawMsg);
 
         // Render images with interactive thumbnail & click-to-zoom lightbox
         let imgTag = '';
-        if (imgUrl) {
-          imgTag = `<div style="margin-top:8px;">
-            <img src="${imgUrl}" class="chat-img-thumb" style="max-width:100%;max-height:240px;border-radius:8px;cursor:pointer;display:block;border:1px solid rgba(255,255,255,0.2);box-shadow:0 4px 12px rgba(0,0,0,0.3);" onclick="openImageLightbox(this.src)" alt="Screenshot" />
-            <div style="font-size:10px;color:rgba(255,255,255,0.6);margin-top:4px;">🔍 Click to Zoom / Fullscreen</div>
-          </div>`;
+        if (imgUrls.length > 0) {
+          imgTag = `<div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">`;
+          imgUrls.forEach((imgSrc, idx) => {
+            imgTag += `
+              <div style="position:relative; display:inline-block; max-width:100%;">
+                <img src="${imgSrc}" class="chat-img-thumb" style="max-width:100%; max-height:280px; border-radius:8px; cursor:pointer; display:block; border:1px solid rgba(255,255,255,0.2); box-shadow:0 4px 14px rgba(0,0,0,0.4);" onclick="openImageLightbox(this.src)" alt="Screenshot ${idx + 1}" />
+                <div style="font-size:10px; color:rgba(255,255,255,0.7); margin-top:4px; font-weight:600;">🔍 Click to Zoom / Fullscreen</div>
+              </div>
+            `;
+          });
+          imgTag += `</div>`;
         }
 
         // Render payment tags
