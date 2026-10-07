@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow"><!-- GitHub Pages pe ho to bhi Google search me na aaye -->
+  <title>Admin Dashboard — MCD ENTRY</title>
+  <!-- MCD ENTRY admin (DATA ENTRY dashboard jaisa look). Sirf aapke computer pe — kisi ko mat dena / upload mat karna.
+       Server function "ncd-admin" se baat karta; password = Supabase secret NCD_ADMIN_PASSWORD. -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --flat-bg: #0f172a; --flat-card: #1e293b; --flat-card-hover: #243248; --flat-border: #334155; --flat-border-light: #475569;
+      --text-main: #f8fafc; --text-muted: #94a3b8; --text-sub: #64748b;
+      --flat-blue: #3b82f6; --flat-blue-hover: #2563eb; --flat-green: #10b981; --flat-green-hover: #059669;
+      --flat-yellow: #f59e0b; --flat-red: #ef4444; --flat-red-hover: #dc2626; --flat-purple: #8b5cf6; --flat-cyan: #06b6d4;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--flat-bg); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
+    .hidden { display: none !important; }
+
+    /* Header */
+    .dash-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 28px; background: var(--flat-card);
+      border-bottom: 2px solid var(--flat-border); position: sticky; top: 0; z-index: 100; gap: 12px; }
+    .dash-header-left { display: flex; align-items: center; gap: 12px; }
+    .dash-logo { font-size: 28px; line-height: 1; }
+    .dash-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .dash-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .dash-actions { display: flex; gap: 8px; }
+    .dash-btn { padding: 9px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif;
+      transition: background .15s ease; border: none; display: inline-flex; align-items: center; gap: 6px; color: #fff; }
+    .dash-btn-refresh { background: var(--flat-green); } .dash-btn-refresh:hover { background: var(--flat-green-hover); }
+    .dash-btn-out { background: #334155; } .dash-btn-out:hover { background: #475569; }
+
+    .dash-content { padding: 24px 28px; max-width: 1440px; margin: 0 auto; }
+
+    /* Stats */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+    .stat-card { background: var(--flat-card); border: 1px solid var(--flat-border); border-radius: 8px; padding: 20px; border-left: 4px solid var(--flat-blue); transition: background .15s; }
+    .stat-card:hover { background: var(--flat-card-hover); border-color: var(--flat-border-light); }
+    .stat-card-icon { font-size: 28px; margin-bottom: 8px; }
+    .stat-card-value { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.5px; }
+    .stat-card-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .c-blue { border-left-color: var(--flat-blue); } .c-blue .stat-card-value { color: var(--flat-blue); }
+    .c-green { border-left-color: var(--flat-green); } .c-green .stat-card-value { color: var(--flat-green); }
+    .c-yellow { border-left-color: var(--flat-yellow); } .c-yellow .stat-card-value { color: var(--flat-yellow); }
+    .c-red { border-left-color: var(--flat-red); } .c-red .stat-card-value { color: var(--flat-red); }
+    .c-purple { border-left-color: var(--flat-purple); } .c-purple .stat-card-value { color: var(--flat-purple); }
+    .c-cyan { border-left-color: var(--flat-cyan); } .c-cyan .stat-card-value { color: var(--flat-cyan); }
+
+    .two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+    /* Panel */
+    .panel { background: var(--flat-card); border: 1px solid var(--flat-border); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 20px; background: #162032; border-bottom: 1px solid var(--flat-border); flex-wrap: wrap; }
+    .panel-title { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+    .panel-body { padding: 18px 20px; }
+    .panel-body.flush { padding: 0; overflow-x: auto; }
+
+    /* Table */
+    .user-table { width: 100%; border-collapse: collapse; }
+    .user-table th { text-align: left; font-family: 'Outfit', sans-serif; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;
+      padding: 12px 14px; font-weight: 700; border-bottom: 2px solid var(--flat-border); background: #162032; white-space: nowrap; }
+    .user-table td { padding: 12px 14px; font-size: 12.5px; color: #cbd5e1; border-bottom: 1px solid var(--flat-border); vertical-align: top; }
+    .user-table tr:hover td { background: var(--flat-card-hover); }
+    .user-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+    .status-active { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
+    .status-expired { background: #7f1d1d; color: #fca5a5; border: 1px solid #dc2626; }
+    .status-off { background: rgba(255,165,0,.1); color: #ffa500; border: 1px solid rgba(255,165,0,.35); }
+    .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; padding: 1px 6px; border-radius: 4px; margin-top: 3px; }
+    .chip-green { background: rgba(0,224,148,.1); border: 1px solid rgba(0,224,148,.3); color: #00e094; }
+    .chip-cyan { background: rgba(0,240,255,.1); border: 1px solid rgba(0,240,255,.3); color: #00f0ff; }
+    .chip-warn { color: #f59e0b; }
+    .click { cursor: pointer; }
+    .pen { font-size: 11px; color: #00f0ff; margin-left: 4px; }
+    .muted { color: var(--text-muted); }
+
+    /* Plan breakdown */
+    .plan-bar-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--flat-border); }
+    .plan-bar-item:last-child { border-bottom: none; }
+    .plan-bar-label { font-size: 13px; font-weight: 600; color: #cbd5e1; min-width: 120px; }
+    .plan-bar-track { flex: 1; height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; border: 1px solid var(--flat-border); }
+    .plan-bar-fill { height: 100%; border-radius: 4px; background: var(--flat-blue); transition: width .4s ease; }
+    .plan-bar-count { font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; color: var(--flat-blue); min-width: 60px; text-align: right; }
+    .loading-text { color: var(--text-muted); font-size: 13px; padding: 24px; text-align: center; font-family: 'Outfit', sans-serif; font-weight: 600; }
+
+    /* Inputs / buttons */
+    .inp, .sel { padding: 8px 12px; background: #0a0a1a; border: 1px solid rgba(124,106,255,.25); border-radius: 8px; color: #eaeaf5; font-size: 12px; font-family: inherit; outline: none; }
+    .inp:focus, .sel:focus { border-color: var(--flat-blue); }
+    .inp.num { color: #00e094; font-weight: 700; width: 90px; }
+    .btn { padding: 8px 16px; color: #fff; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .btn-green { background: linear-gradient(135deg,#00e094,#00b377); }
+    .btn-purple { background: linear-gradient(135deg,#7c6aff,#a395ff); }
+    .btn-blue { background: var(--flat-blue); } .btn-blue:hover { background: var(--flat-blue-hover); }
+    .btn-red { background: var(--flat-red); } .btn-red:hover { background: var(--flat-red-hover); }
+    .btn-ghost { background: #162032; border: 1px solid var(--flat-border); color: #cbd5e1; }
+    .btn-ghost:hover { background: var(--flat-card-hover); border-color: var(--flat-border-light); }
+    .btn-sm { padding: 5px 10px; font-size: 11px; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .row + .row { margin-top: 12px; }
+    .row.sep { padding-top: 12px; border-top: 1px solid rgba(255,255,255,.06); }
+    .lbl { font-size: 12px; color: #8888aa; }
+    .act-sel { width: 100%; min-width: 190px; padding: 7px 8px; background: #0a0a1a; border: 1px solid rgba(124,106,255,.35); border-radius: 6px; color: #eaeaf5; font-size: 11px; font-weight: 600; cursor: pointer; outline: none; }
+
+    /* Password screen */
+    .pw-screen { position: fixed; inset: 0; background: #0b0f19; display: flex; align-items: center; justify-content: center; z-index: 999999; }
+    .pw-card { background: #162032; border: 1px solid #334155; border-radius: 14px; padding: 36px 32px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+    .pw-icon { font-size: 38px; margin-bottom: 12px; }
+    .pw-title { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .pw-sub { font-size: 13px; color: #94a3b8; margin-bottom: 22px; }
+    .pw-input { width: 100%; padding: 13px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 15px; outline: none; margin-bottom: 16px; text-align: center; letter-spacing: 2px; }
+    .pw-input:focus { border-color: #3b82f6; }
+    .pw-btn { width: 100%; padding: 13px; background: #3b82f6; border: none; border-radius: 8px; color: #fff; font-size: 14px; font-weight: 800; font-family: 'Outfit', sans-serif; cursor: pointer; }
+    .pw-btn:hover { background: #2563eb; }
+    .pw-remember { margin-top: 12px; font-size: 12px; color: #94a3b8; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .pw-error { color: #ef4444; font-size: 12px; font-weight: 700; margin-top: 14px; min-height: 18px; }
+
+    /* Modals */
+    .modal { position: fixed; inset: 0; background: rgba(7,7,14,.85); backdrop-filter: blur(8px); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal.open { display: flex; }
+    .modal-card { background: linear-gradient(145deg,#13132e,#1a1a45); border: 1px solid rgba(124,106,255,.35); border-radius: 18px; width: 100%; max-width: 520px;
+      box-shadow: 0 25px 70px rgba(0,0,0,.8); overflow: hidden; animation: modalScaleIn .25s ease; max-height: 92vh; display: flex; flex-direction: column; }
+    .modal-card.wide { max-width: 760px; }
+    .modal-head { padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,.25); }
+    .modal-title { font-size: 17px; font-weight: 800; background: linear-gradient(90deg,#00f0ff,#00e094); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .modal-email { font-size: 12px; color: #9d8cff; margin-top: 3px; font-weight: 600; }
+    .modal-x { background: rgba(255,255,255,.08); border: none; color: #eaeaf5; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 15px; }
+    .modal-x:hover { background: rgba(255,77,109,.35); }
+    .modal-body { padding: 18px 22px; overflow-y: auto; }
+    .modal-sec { margin-bottom: 16px; }
+    .modal-sec h4 { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-family: 'Outfit', sans-serif; }
+    .big-now { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: #00e094; }
+    .quick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .quick button { padding: 6px 11px; background: #162032; border: 1px solid var(--flat-border); color: #cbd5e1; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+    .quick button:hover { border-color: var(--flat-blue); }
+    .opt-card { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; background: #162032; border: 1px solid var(--flat-border); border-radius: 10px; margin-bottom: 8px; }
+    .opt-card b { font-size: 13px; } .opt-card p { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+    .msg-err { color: var(--flat-red); font-size: 12px; font-weight: 700; min-height: 16px; margin-top: 6px; }
+    @keyframes modalScaleIn { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* 💬 chat */
+    .chat-wrap { display: grid; grid-template-columns: 280px 1fr; min-height: 360px; }
+    .chat-list { border-right: 1px solid var(--flat-border); max-height: 420px; overflow-y: auto; }
+    .chat-item { padding: 10px 14px; border-bottom: 1px solid var(--flat-border); cursor: pointer; }
+    .chat-item:hover, .chat-item.on { background: var(--flat-card-hover); }
+    .chat-item b { font-size: 12.5px; display: flex; justify-content: space-between; gap: 6px; }
+    .chat-item p { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+    .chat-unread { background: var(--flat-red); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 10.5px; font-weight: 800; }
+    .chat-thread { display: flex; flex-direction: column; max-height: 420px; }
+    .chat-head { padding: 10px 14px; font-size: 12.5px; font-weight: 700; color: #9d8cff; border-bottom: 1px solid var(--flat-border); }
+    .chat-msgs { flex: 1; overflow-y: auto; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-height: 240px; }
+    .chat-bub { max-width: 75%; padding: 8px 11px; border-radius: 10px; font-size: 12.5px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+    .chat-bub small { display: block; font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+    .chat-bub.user { background: #162032; border: 1px solid var(--flat-border); align-self: flex-start; }
+    .chat-bub.admin { background: rgba(59,130,246,.18); border: 1px solid rgba(59,130,246,.45); align-self: flex-end; }
+    .chat-send { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--flat-border); }
+    .chat-send .inp { flex: 1; }
+    @media (max-width: 700px) { .chat-wrap { grid-template-columns: 1fr; } .chat-list { border-right: none; border-bottom: 1px solid var(--flat-border); max-height: 200px; } }
+
+    #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #0b1324; border: 1px solid var(--flat-border-light); color: #fff;
+      padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 1000000; }
+    #toast.show { opacity: 1; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: var(--flat-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--flat-border); border-radius: 3px; }
+
+    @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; } .two-cols { grid-template-columns: 1fr; } .dash-content { padding: 16px 14px; } }
+    @media (max-width: 600px) { .dash-header { flex-direction: column; align-items: stretch; padding: 12px 14px; } .dash-btn { flex: 1; justify-content: center; } }
+  </style>
+</head>
+<body>
+
+  <!-- Password Screen -->
+  <div class="pw-screen" id="pwScreen">
+    <div class="pw-card">
+      <div class="pw-icon">📊</div>
+      <div class="pw-title">Admin Dashboard</div>
+      <div class="pw-sub">MCD ENTRY — password daalo</div>
+      <input type="password" class="pw-input" id="pwInput" placeholder="Password..." autofocus>
+      <button class="pw-btn" id="pwBtn">🔓 Unlock</button>
+      <label class="pw-remember"><input type="checkbox" id="pwRemember"> Is computer pe yaad rakho</label>
+      <div class="pw-error" id="pwError"></div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="mainApp" class="hidden">
+    <div class="dash-header">
+      <div class="dash-header-left">
+        <div class="dash-logo">📊</div>
+        <div>
+          <div class="dash-title">Admin Dashboard</div>
+          <div class="dash-subtitle">MCD ENTRY — Business Overview</div>
+        </div>
+      </div>
+      <div class="dash-actions">
+        <button class="dash-btn dash-btn-refresh" id="refreshBtn">🔄 Refresh</button>
+        <button class="dash-btn dash-btn-out" id="logoutBtn">🔒 Lock</button>
+      </div>
+    </div>
+
+    <div class="dash-content">
+      <div class="stats-row">
+        <div class="stat-card c-blue"><div class="stat-card-icon">👥</div><div class="stat-card-value" id="stUsers">-</div><div class="stat-card-label">Total Users</div></div>
+        <div class="stat-card c-green"><div class="stat-card-icon">✅</div><div class="stat-card-value" id="stActive">-</div><div class="stat-card-label">Active Plans</div></div>
+        <div class="stat-card c-yellow"><div class="stat-card-icon">💰</div><div class="stat-card-value" id="stRevenue">-</div><div class="stat-card-label">Total Revenue</div></div>
+        <div class="stat-card c-red"><div class="stat-card-icon">❌</div><div class="stat-card-value" id="stExpired">-</div><div class="stat-card-label">Expired Plans</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card c-cyan"><div class="stat-card-icon">🩺</div><div class="stat-card-value" id="stEntries">-</div><div class="stat-card-label">Aaj Entry (credit kata)</div></div>
+        <div class="stat-card c-green"><div class="stat-card-icon">🧾</div><div class="stat-card-value" id="stPaidToday">-</div><div class="stat-card-label">Aaj Payment</div></div>
+        <div class="stat-card c-purple"><div class="stat-card-icon">💳</div><div class="stat-card-value" id="stCredits">-</div><div class="stat-card-label">Sab users ke bache credit</div></div>
+        <div class="stat-card c-red"><div class="stat-card-icon">🚨</div><div class="stat-card-value" id="stAbuse">-</div><div class="stat-card-label">Aaj dhokhe ki koshish</div></div>
+      </div>
+
+      <div class="two-cols">
+        <div class="panel" style="margin-bottom:0;">
+          <div class="panel-header"><div class="panel-title">📦 Plan Breakdown <span class="muted" style="text-transform:none;font-weight:600;">(kitni baar bika)</span></div></div>
+          <div class="panel-body" id="planBreakdown"><div class="loading-text">Loading...</div></div>
+        </div>
+        <div class="panel" style="margin-bottom:0;">
+          <div class="panel-header"><div class="panel-title">🆕 Recent Users</div></div>
+          <div class="panel-body flush" id="recentUsers"><div class="loading-text">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- Bulk Actions -->
+      <div class="panel" style="border:1px solid rgba(0,224,148,.2);">
+        <div class="panel-header"><div class="panel-title">🚀 Bulk Actions</div></div>
+        <div class="panel-body">
+          <div class="row">
+            <span class="lbl">💰 Sabko credits do:</span>
+            <input type="number" id="bulkCredits" class="inp num" placeholder="100" min="1">
+            <input type="text" id="bulkNote" class="inp" placeholder="🎊 Diwali pe 100 credit FREE!" style="flex:1;min-width:200px;">
+            <button class="btn btn-green" id="bulkGiveBtn">🎁 Sabko Do</button>
+          </div>
+          <div class="row">
+            <span class="lbl">👤 Ek user ko:</span>
+            <input type="email" id="singleEmail" class="inp" placeholder="user@gmail.com" style="width:220px;">
+            <input type="number" id="singleCredits" class="inp num" placeholder="100" min="1">
+            <button class="btn btn-purple" id="singleGiveBtn">💰 Credits Do</button>
+          </div>
+          <div class="row sep">
+            <span class="lbl">➕ Naya user add karo:</span>
+            <input type="email" id="newEmail" class="inp" placeholder="newuser@gmail.com" style="width:220px;">
+            <input type="number" id="newCredits" class="inp num" placeholder="Credit" min="0">
+            <input type="number" id="newDays" class="inp num" placeholder="Din" min="1" title="Validity din (khaali = hamesha)">
+            <input type="text" id="newPortal" class="inp" placeholder="🔑 NCD portal ID" style="width:150px;" title="User ki NCD portal login ID (ANY = koi bhi). Khaali = extension band jab tak aap na likho">
+            <input type="text" id="newNote" class="inp" placeholder="Note (jaise PHC Nokha)" style="width:180px;">
+            <button class="btn btn-green" id="addUserBtn">➕ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🎟️ Referral / Invite codes -->
+      <div class="panel" style="border:1px solid rgba(0,240,255,.25);">
+        <div class="panel-header">
+          <div class="panel-title">🎟️ Referral Codes <span class="muted" style="text-transform:none;font-weight:600;">— naya user sirf code se judega</span></div>
+          <label class="lbl" style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="inviteOnly"> Bina code naya user band</label>
+        </div>
+        <div class="panel-body">
+          <div class="row">
+            <input type="text" id="ivCode" class="inp" placeholder="Code (khaali = khud banega)" style="width:190px;text-transform:uppercase;">
+            <input type="number" id="ivCredits" class="inp num" placeholder="Credit" min="0">
+            <input type="number" id="ivDays" class="inp num" placeholder="Din" min="1" title="Validity din (khaali = hamesha)">
+            <input type="number" id="ivUses" class="inp num" placeholder="Kitne log" min="1" value="1" title="Kitne users is code se jud sakte">
+            <input type="text" id="ivPortal" class="inp" placeholder="🔑 NCD portal ID" style="width:150px;" title="Is code se judne wale ki NCD portal login ID (ANY = koi bhi). Khaali = extension band jab tak aap user me ID na likho">
+            <input type="text" id="ivNote" class="inp" placeholder="Kiske liye (jaise Ramesh PHC)" style="width:200px;">
+            <button class="btn btn-green" id="ivSave">🎟️ Code Banao</button>
+          </div>
+        </div>
+        <div class="panel-body flush" id="invitesTable" style="max-height:360px;overflow-y:auto;"><div class="loading-text">Loading...</div></div>
+      </div>
+
+      <!-- 💬 User Chat -->
+      <div class="panel" id="chatPanelBox" style="border:1px solid rgba(0,240,255,.25);">
+        <div class="panel-header">
+          <div class="panel-title">💬 User Chat <span class="chat-unread hidden" id="chatUnread">0</span></div>
+          <button class="btn btn-ghost btn-sm" id="chatRefresh">🔄</button>
+        </div>
+        <div class="chat-wrap">
+          <div class="chat-list" id="chatList"><div class="loading-text">Loading...</div></div>
+          <div class="chat-thread">
+            <div class="chat-head" id="chatHead">← User chuno</div>
+            <div class="chat-msgs" id="chatMsgs"></div>
+            <div class="chat-send">
+              <input type="text" id="chatInput" class="inp" placeholder="Jawab likho… (Enter = bhejo)" maxlength="1000" disabled>
+              <button class="btn btn-blue" id="chatSendBtn" disabled>Bhejo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Users -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">👥 All Users</div>
+          <input type="text" id="userSearch" class="inp" placeholder="🔍 Search email / portal ID / note..." style="width:260px;">
+        </div>
+        <div class="panel-body flush" id="allUsersTable"><div class="loading-text">Loading...</div></div>
+      </div>
+
+      <!-- Plans -->
+      <div class="panel" style="border:1px solid rgba(124,106,255,.25);">
+        <div class="panel-header"><div class="panel-title">💎 Recharge Plans <span class="muted" style="text-transform:none;font-weight:600;">— email khaali = sabko, email = sirf usko</span></div></div>
+        <div class="panel-body">
+          <div class="row" id="planForm">
+            <input type="text" id="pfId" class="inp" placeholder="ID (khud banega)" style="width:150px;">
+            <input type="text" id="pfName" class="inp" placeholder="Naam (500 credit)" style="width:160px;">
+            <input type="number" id="pfPrice" class="inp num" placeholder="₹ Daam" min="1">
+            <input type="number" id="pfCredits" class="inp num" placeholder="Credit" min="1">
+            <input type="number" id="pfDays" class="inp num" placeholder="Din" min="1" title="Validity din (khaali = hamesha)">
+            <input type="email" id="pfEmail" class="inp" placeholder="Sirf is user ko (khaali = sabko)" style="width:220px;">
+            <select id="pfActive" class="sel"><option value="1">✅ Chalu</option><option value="0">❌ Band</option></select>
+            <button class="btn btn-green" id="pfSave">💾 Save</button>
+            <button class="btn btn-ghost" id="pfClear">Naya</button>
+          </div>
+        </div>
+        <div class="panel-body flush" id="plansTable"><div class="loading-text">Loading...</div></div>
+      </div>
+
+      <div class="two-cols">
+        <!-- Settings -->
+        <div class="panel" style="margin-bottom:0;">
+          <div class="panel-header"><div class="panel-title">⚙️ Credit Cost Settings</div></div>
+          <div class="panel-body">
+            <div class="row"><span class="lbl" style="min-width:170px;">🆕 Naya enroll = credit</span><input type="number" id="stNew" class="inp num" min="0"></div>
+            <div class="row"><span class="lbl" style="min-width:170px;">👪 Purana BP / Sugar = credit</span><input type="number" id="stEx" class="inp num" min="0"></div>
+            <div class="row"><span class="lbl" style="min-width:170px;">🎁 Naye user ko free credit</span><input type="number" id="stFree" class="inp num" min="0"></div>
+            <div class="row"><button class="btn btn-green" id="stSave">💾 Save Settings</button></div>
+          </div>
+        </div>
+        <!-- Abuse -->
+        <div class="panel" style="margin-bottom:0;border:1px solid rgba(239,68,68,.3);">
+          <div class="panel-header"><div class="panel-title">🚨 Dhokhe ki koshish</div></div>
+          <div class="panel-body flush" id="abuseTable" style="max-height:300px;overflow-y:auto;"><div class="loading-text">Loading...</div></div>
+        </div>
+      </div>
+
+      <!-- Payments -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">🧾 Payments (PayU)</div>
+          <input type="text" id="paySearch" class="inp" placeholder="🔍 Email / txn..." style="width:220px;">
+        </div>
+        <div class="panel-body flush" id="paymentsTable" style="max-height:420px;overflow-y:auto;"><div class="loading-text">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💰 Credit Edit Modal -->
+  <div class="modal" id="creditModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><div class="modal-title">💰 Credits Badlo</div><div class="modal-email" data-m-email></div></div><button class="modal-x" data-close>✕</button></div>
+      <div class="modal-body">
+        <div class="modal-sec"><h4>Abhi ke credit</h4><div class="big-now" id="cmNow">0</div></div>
+        <div class="modal-sec"><h4>🎯 Exact set karo</h4>
+          <div class="quick">
+            <button data-exact="0">0</button><button data-exact="100">100</button><button data-exact="500">500</button>
+            <button data-exact="1000">1,000</button><button data-exact="2000">2,000</button><button data-exact="5000">5,000</button>
+          </div>
+          <div class="row"><input type="number" id="cmExact" class="inp num" min="0" style="width:130px;"><button class="btn btn-blue" id="cmExactBtn">Set Balance</button></div>
+        </div>
+        <div class="modal-sec"><h4>➕➖ Jodo / Kaato</h4>
+          <div class="quick">
+            <button data-adj="100">+100</button><button data-adj="500">+500</button><button data-adj="1000">+1,000</button>
+            <button data-adj="-100">-100</button><button data-adj="-500">-500</button>
+          </div>
+          <div class="row"><input type="number" id="cmAdj" class="inp num" style="width:130px;" placeholder="+/-"><button class="btn btn-green" id="cmAdjBtn">Apply</button></div>
+        </div>
+        <div class="modal-sec"><h4>📝 Kaaran (hisaab me likha jaayega)</h4><input type="text" id="cmNote" class="inp" style="width:100%;" placeholder="jaise: cash ₹200 mila"></div>
+        <div class="msg-err" id="cmErr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📅 Expiry Modal -->
+  <div class="modal" id="expiryModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><div class="modal-title">📅 Validity / Expiry</div><div class="modal-email" data-m-email></div></div><button class="modal-x" data-close>✕</button></div>
+      <div class="modal-body">
+        <div class="modal-sec"><h4>Abhi</h4><div class="big-now" id="emNow" style="font-size:20px;color:#ffd700;">-</div></div>
+        <div class="modal-sec"><h4>⚡ Jaldi badhao (aaj / bachi validity ke baad)</h4>
+          <div class="quick">
+            <button data-days="7">+7 Days</button><button data-days="15">+15 Days</button><button data-days="30">+30 Days</button>
+            <button data-days="60">+60 Days</button><button data-days="90">+90 Days</button><button data-days="180">+6 Months</button><button data-days="365">+1 Year</button>
+          </div>
+        </div>
+        <div class="modal-sec"><h4>📆 Khud date chuno</h4>
+          <div class="row"><input type="date" id="emDate" class="inp"><button class="btn btn-blue" id="emDateBtn">Set Date</button></div>
+        </div>
+        <div class="modal-sec"><h4>Aur</h4>
+          <div class="row"><button class="btn btn-purple" id="emLifetime">♾️ Hamesha (koi expiry nahi)</button><button class="btn btn-red" id="emExpireNow">⛔ Abhi Expire karo</button></div>
+        </div>
+        <div class="msg-err" id="emErr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💻 Device / Multi-PC Modal -->
+  <div class="modal" id="deviceModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><div class="modal-title">💻 Device / Multi-PC Manager</div><div class="modal-email" data-m-email></div></div><button class="modal-x" data-close>✕</button></div>
+      <div class="modal-body">
+        <div class="modal-sec"><h4>Abhi</h4><div id="dmNow" style="font-size:13px;font-weight:700;"></div></div>
+        <div class="opt-card"><div><b>🔄 Reset Device</b><p>Purana PC hatao — user jis naye PC se login karega usi se bandh jaayega</p></div><button class="btn btn-blue" data-dev="">Reset Device</button></div>
+        <div class="opt-card"><div><b>♾️ Unlimited PC</b><p>Kisi bhi PC se chalega (rok hatao)</p></div><button class="btn btn-green" data-dev="ANY">Enable Unlimited</button></div>
+        <div class="opt-card"><div><b>🔒 Re-Lock</b><p>Unlimited se wapas ek PC (agla login wala PC)</p></div><button class="btn btn-purple" data-dev="">Re-Lock</button></div>
+        <div class="msg-err" id="dmErr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔑 Portal ID Lock Modal -->
+  <div class="modal" id="portalModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><div class="modal-title">🔑 NCD Portal ID Lock</div><div class="modal-email" data-m-email></div></div><button class="modal-x" data-close>✕</button></div>
+      <div class="modal-body">
+        <div class="modal-sec"><h4>Abhi bandha hai</h4><div id="pmNow" style="font-size:13px;font-weight:700;"></div></div>
+        <div class="opt-card" style="flex-wrap:wrap;"><div><b>✏️ ID likho</b><p>User ki NCD portal login ID — sirf isi ID pe extension chalega</p></div>
+          <div class="row"><input type="text" id="pmSet" class="inp" placeholder="portal username" style="width:180px;"><button class="btn btn-purple" id="pmSetBtn">Save</button></div></div>
+        <div class="opt-card"><div><b>♾️ Koi bhi ID</b><p>Kisi bhi portal ID se chalega — sirf bharose wale user / review test ID ke liye</p></div><button class="btn btn-green" data-portal="ANY">Allow Any</button></div>
+        <div class="opt-card"><div><b>🗑 ID hatao</b><p>Extension BAND ho jaayega jab tak aap nayi ID na likho (apne aap nahi judti)</p></div><button class="btn btn-red" data-portal="">Hatao</button></div>
+        <div class="msg-err" id="pmErr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💲 Is user ka credit daam -->
+  <div class="modal" id="costModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><div class="modal-title">💲 Is User ka Credit Daam</div><div class="modal-email" data-m-email></div></div><button class="modal-x" data-close>✕</button></div>
+      <div class="modal-body">
+        <div class="modal-sec"><h4>Abhi</h4><div id="cstNow" style="font-size:13px;font-weight:700;"></div></div>
+        <div class="modal-sec"><h4>Ek entry pe kitne credit katenge (khaali = sabke jaisa)</h4>
+          <div class="row"><span class="lbl" style="min-width:170px;">🆕 Naya enroll = credit</span><input type="number" id="cstNew" class="inp num" min="0"></div>
+          <div class="row"><span class="lbl" style="min-width:170px;">👪 Purana BP / Sugar = credit</span><input type="number" id="cstEx" class="inp num" min="0"></div>
+        </div>
+        <div class="row"><button class="btn btn-green" id="cstSave">💾 Save</button><button class="btn btn-ghost" id="cstReset">↩ Sabke jaisa karo</button></div>
+        <div class="msg-err" id="cstErr"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 Usage Modal -->
+  <div class="modal" id="usageModal">
+    <div class="modal-card wide">
+      <div class="modal-head"><div><div class="modal-title">📊 Day-Wise Credit Usage History</div><div class="modal-email" data-m-email></div></div><button class="modal-x" data-close>✕</button></div>
+      <div class="modal-body" id="usageBody"><div class="loading-text">Loading...</div></div>
+    </div>
+  </div>
+
+  <!-- 💎 Personal Plan Modal -->
+  <div class="modal" id="planModal">
+    <div class="modal-card">
+      <div class="modal-head"><div><div class="modal-title">💎 Is User ka Plan</div><div class="modal-email" data-m-email></div></div><button class="modal-x" data-close>✕</button></div>
+      <div class="modal-body">
+        <div class="modal-sec"><h4>Abhi is user ke liye</h4><div id="plmList" class="muted" style="font-size:12px;"></div></div>
+        <div class="modal-sec"><h4>➕ Naya plan (sirf ye user Recharge me dekhega)</h4>
+          <div class="row">
+            <input type="text" id="plmName" class="inp" placeholder="Naam (500 credit)" style="width:170px;">
+            <input type="number" id="plmPrice" class="inp num" placeholder="₹" min="1">
+            <input type="number" id="plmCredits" class="inp num" placeholder="Credit" min="1">
+            <input type="number" id="plmDays" class="inp num" placeholder="Din" min="1">
+          </div>
+          <div class="row"><button class="btn btn-green" id="plmSave">💾 Plan Bhejo</button></div>
+        </div>
+        <div class="msg-err" id="plmErr"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+<script>
+// ⚙️ MCD ENTRY Supabase project (public — gupt nahi)
+const FN = "https://fjgmwcbfolxmpsfnhkgs.supabase.co/functions/v1/ncd-admin";
+const ANON = "sb_publishable__H9nvnlR3P7A2DtH_LEEaQ_nJCe5Fqa";
+const PASS_KEY = "mcdAdminPass";
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const IST = { timeZone: "Asia/Kolkata" };
+const fmtDate = (t) => (t ? new Date(t).toLocaleDateString("en-IN", { ...IST, day: "2-digit", month: "short", year: "numeric" }) : "-");
+const fmtTime = (t) => (t ? new Date(t).toLocaleString("en-IN", { ...IST, day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "-");
+const dayKey = (t) => new Date(t).toLocaleDateString("en-CA", IST);
+let pass = "", users = [], plans = [], payments = [], abuse = [], curEmail = "";
+
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2800);
+}
+async function api(action, data) {
+  const r = await fetch(FN, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: ANON, Authorization: `Bearer ${ANON}`, "x-admin-key": pass },
+    body: JSON.stringify({ action, ...(data || {}) }),
+  });
+  const j = await r.json().catch(() => ({ ok: false, error: `HTTP ${r.status}` }));
+  if (r.status === 401 || j.error === "BAD_PASSWORD") { lock(); throw new Error("Password galat"); }
+  if (j.error === "ADMIN_NOT_SET") throw new Error("Supabase Secrets me NCD_ADMIN_PASSWORD (10+ akshar) nahi hai");
+  if (!j.ok) throw new Error(j.error || "Galti");
+  return j;
+}
+const ERR = { EXISTS: "Ye user pehle se hai", BAD_EMAIL: "Email sahi nahi", NO_USER: "User nahi mila", NEGATIVE: "Itna credit nahi hai (minus me nahi ja sakta)", ZERO: "0 se zyada daalo" };
+const errTxt = (e) => ERR[e.message] || e.message;
+
+// ---------- login ----------
+async function unlock(p, quiet) {
+  pass = p; $("pwError").textContent = "";
+  try {
+    await api("overview");
+    if ($("pwRemember").checked) { try { localStorage.setItem(PASS_KEY, p); } catch (e) {} }
+    $("pwScreen").classList.add("hidden"); $("mainApp").classList.remove("hidden");
+    loadAll();
+  } catch (e) { pass = ""; if (!quiet) $("pwError").textContent = errTxt(e); }
+}
+function lock() {
+  if (typeof chatPoll === "function") chatPoll(false);
+  pass = ""; try { localStorage.removeItem(PASS_KEY); } catch (e) {}
+  $("mainApp").classList.add("hidden"); $("pwScreen").classList.remove("hidden"); $("pwInput").value = ""; $("pwInput").focus();
+}
+$("pwBtn").onclick = () => unlock($("pwInput").value.trim());
+$("pwInput").onkeydown = (e) => { if (e.key === "Enter") unlock($("pwInput").value.trim()); };
+$("logoutBtn").onclick = lock;
+$("refreshBtn").onclick = () => { loadAll(); toast("🔄 Refresh"); };
+
+// ---------- 🎟️ referral codes ----------
+let invites = [], inviteUsers = [];
+async function loadInvites() {
+  try { const r = await api("invites"); invites = r.invites || []; inviteUsers = r.users || []; renderInvites(); } catch (e) { toast(errTxt(e)); }
+}
+function renderInvites() {
+  $("invitesTable").innerHTML = invites.length ? `<table class="user-table"><thead><tr><th>Code</th><th>Credit</th><th>Validity</th><th>Use</th><th>🔑 Portal ID</th><th>Kisne use kiya</th><th>Note</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+    invites.map((v) => {
+      const who = inviteUsers.filter((u) => u.invite_code === v.code).map((u) => esc(u.email)).join("<br>");
+      const full = v.used >= v.max_uses;
+      return `<tr${v.active && !full ? "" : ' style="opacity:.55;"'}>
+        <td><strong style="color:#00f0ff;letter-spacing:1px;">${esc(v.code)}</strong> <button class="btn btn-ghost btn-sm" data-ivcopy="${esc(v.code)}" title="Copy">📋</button></td>
+        <td style="color:#00e094;font-weight:700;">${v.credits}</td>
+        <td>${v.validity_days ? v.validity_days + " din" : '<span class="muted">♾️ Hamesha</span>'}</td>
+        <td>${v.used} / ${v.max_uses}</td>
+        <td>${v.portal_user === "ANY" ? '<span class="chip chip-cyan">♾️ Koi bhi</span>' : v.portal_user ? `<span class="chip chip-cyan">👤 ${esc(v.portal_user)}</span>` : '<span class="chip chip-warn">⚠️ Nahi (baad me likho)</span>'}</td>
+        <td style="font-size:11.5px;">${who || '<span class="muted">—</span>'}</td>
+        <td>${esc(v.note || "")}</td>
+        <td>${full ? '<span class="status-badge status-off">Poora</span>' : v.active ? '<span class="status-badge status-active">Chalu</span>' : '<span class="status-badge status-expired">Band</span>'}</td>
+        <td style="white-space:nowrap;"><button class="btn btn-ghost btn-sm" data-ivtog="${esc(v.code)}">${v.active ? "Band" : "Chalu"}</button>
+          <button class="btn btn-red btn-sm" data-ivdel="${esc(v.code)}">🗑</button></td></tr>`;
+    }).join("")
+  }</tbody></table>` : `<div class="loading-text">Abhi koi code nahi — upar se banao</div>`;
+}
+$("ivSave").onclick = async () => {
+  try {
+    const r = await api("invite_save", { invite: {
+      code: $("ivCode").value, credits: $("ivCredits").value || 0, validity_days: $("ivDays").value,
+      max_uses: $("ivUses").value || 1, note: $("ivNote").value, portal_user: $("ivPortal").value, active: true,
+    } });
+    try { await navigator.clipboard.writeText(r.code); } catch (e) {}
+    toast(`🎟️ Code bana: ${r.code} (copy ho gaya)${$("ivPortal").value.trim() ? "" : " — ⚠️ portal ID nahi: user ka extension band rahega jab tak aap na likho"}`);
+    ["ivCode", "ivCredits", "ivDays", "ivNote", "ivPortal"].forEach((id) => ($(id).value = "")); $("ivUses").value = "1";
+    loadInvites();
+  } catch (e) { toast(errTxt(e)); }
+};
+$("invitesTable").addEventListener("click", async (ev) => {
+  const b = ev.target.closest("button"); if (!b) return;
+  if (b.dataset.ivcopy) { try { await navigator.clipboard.writeText(b.dataset.ivcopy); toast("📋 Copy: " + b.dataset.ivcopy); } catch (e) { toast(b.dataset.ivcopy); } return; }
+  const v = invites.find((x) => x.code === (b.dataset.ivtog || b.dataset.ivdel)); if (!v) return;
+  try {
+    if (b.dataset.ivtog) { await api("invite_save", { invite: { ...v, active: !v.active } }); toast("✅ Badal gaya"); }
+    else { if (!confirm(`Code ${v.code} hatayein?`)) return; await api("invite_delete", { code: v.code }); toast("🗑 Hata diya"); }
+    loadInvites();
+  } catch (e) { toast(errTxt(e)); }
+});
+$("inviteOnly").onchange = async () => {
+  try {
+    await api("settings_save", { cost_new: $("stNew").value, cost_existing: $("stEx").value, free_signup_credits: $("stFree").value, invite_only: $("inviteOnly").checked });
+    toast($("inviteOnly").checked ? "🔒 Ab naya user sirf code se" : "⚠️ Ab koi bhi Gmail se naya user ban sakta");
+  } catch (e) { toast(errTxt(e)); $("inviteOnly").checked = !$("inviteOnly").checked; }
+};
+
+async function loadAll() {
+  await Promise.all([loadOverview(), loadUsers(), loadPlans(), loadPayments(), loadAbuse(), loadSettings(), loadInvites(), loadChats()]);
+  renderBreakdown();
+  chatPoll(true); // har 30 sec naye sandesh
+}
+async function loadOverview() {
+  try {
+    const o = await api("overview");
+    $("stUsers").textContent = o.users; $("stActive").textContent = o.activePlans ?? "-";
+    $("stRevenue").textContent = "₹" + (o.revenueInr ?? 0).toLocaleString("en-IN"); $("stExpired").textContent = o.expiredPlans ?? "-";
+    $("stEntries").textContent = o.entriesToday; $("stPaidToday").textContent = "₹" + o.paidTodayInr;
+    $("stCredits").textContent = (o.creditsTotal || 0).toLocaleString("en-IN"); $("stAbuse").textContent = o.abuseToday ?? 0;
+  } catch (e) { toast(errTxt(e)); }
+}
+
+// ---------- users ----------
+async function loadUsers() { try { users = (await api("users")).users || []; renderUsers(); renderRecent(); } catch (e) { toast(errTxt(e)); } }
+const isActive = (u) => u.enabled && u.credits > 0 && (!u.expiry_date || new Date(u.expiry_date) >= new Date());
+function renderRecent() {
+  const list = [...users].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 8);
+  $("recentUsers").innerHTML = list.length ? `<table class="user-table"><thead><tr><th>Email</th><th>Credit</th><th>Date</th></tr></thead><tbody>${
+    list.map((u) => `<tr><td>${esc(u.email)}</td><td style="color:#00e094;font-weight:700;">${u.credits}</td><td class="muted">${fmtDate(u.created_at)}</td></tr>`).join("")
+  }</tbody></table>` : `<div class="loading-text">Abhi koi user nahi</div>`;
+}
+function renderUsers() {
+  const q = $("userSearch").value.trim().toLowerCase();
+  const list = users.filter((u) => !q || u.email.includes(q) || String(u.portal_user || "").toLowerCase().includes(q) || String(u.note || "").toLowerCase().includes(q));
+  if (!list.length) { $("allUsersTable").innerHTML = `<div class="loading-text">Koi user nahi mila</div>`; return; }
+  // v2.0: ek portal ID 2+ account pe = ⚠️ (ek hatao — entry ruki rahegi)
+  const pk = (s) => String(s || "").trim().toLowerCase();
+  const idCount = {};
+  users.forEach((u) => { const k = pk(u.portal_user); if (k && k !== "any") idCount[k] = (idCount[k] || 0) + 1; });
+  $("allUsersTable").innerHTML = `<table class="user-table"><thead><tr><th>User & Portal Lock</th><th>Credits</th><th>Expiry</th><th>Status</th><th>Aakhri baar</th><th>Note</th><th>Actions</th></tr></thead><tbody>${
+    list.map((u) => {
+      const e = esc(u.email);
+      // portal ID sirf admin likhta (v1.2) — khaali = user ka extension band
+      const portal = u.portal_user === "ANY" ? `<span class="chip chip-cyan">👤 Koi bhi ID</span>` : u.portal_user ? `<span class="chip chip-cyan">👤 ${esc(u.portal_user)}</span>`
+        : `<span class="chip chip-warn" title="Action → 🔑 Portal ID se likho">⚠️ Portal ID nahi — extension band</span>`;
+      const pc = u.device_id === "ANY" ? `<span class="chip chip-green">💻 Unlimited PC</span>` : u.device_id ? `<span class="chip chip-green" title="${esc(u.device_id)}">💻 1 PC</span>` : "";
+      const inv = u.invite_code ? `<span class="chip" style="background:rgba(124,106,255,.12);border:1px solid rgba(124,106,255,.35);color:#9d8cff;">🎟️ ${esc(u.invite_code)}</span>` : "";
+      const own = u.cost_new != null || u.cost_existing != null
+        ? `<span class="chip" style="background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.35);color:#ffd700;" title="Is user ka apna daam (naya / purana)">💲 ${u.cost_new ?? "—"} / ${u.cost_existing ?? "—"}</span>` : "";
+      const dup = idCount[pk(u.portal_user)] > 1
+        ? `<span class="chip" style="background:rgba(239,68,68,.15);border:1px solid #ef4444;color:#fca5a5;" title="Ye portal ID ek se zyada account pe — ek ki ID hatao, tab tak dono ki entry ruki">⚠️ Same ID ${idCount[pk(u.portal_user)]} account</span>` : "";
+      const up = u.allow_upload === false ? `<span class="chip chip-warn" title="Report upload / Patient List band">📁 OFF</span>` : "";
+      const lockHtml = `<div style="display:flex;gap:6px;flex-wrap:wrap;">${pc}${portal}${dup}${inv}${own}${up}</div>`;
+      const exp = u.expiry_date ? new Date(u.expiry_date) : null;
+      const expHtml = !exp ? `<span style="color:#94a3b8;font-weight:700;">♾️ Hamesha</span>` : `<span style="color:${exp < new Date() ? "#fca5a5" : "#ffd700"};font-weight:700;">${fmtDate(exp)}</span>`;
+      const st = !u.enabled ? `<span class="status-badge status-off">🔧 Off</span>` : isActive(u) ? `<span class="status-badge status-active">Active</span>` : `<span class="status-badge status-expired">Expired</span>`;
+      return `<tr${u.enabled ? "" : ' style="opacity:.55;"'}>
+        <td><strong>${e}</strong>${lockHtml}</td>
+        <td class="click" data-credit="${e}"><strong style="color:#00e094;font-size:13px;">${(u.credits || 0).toLocaleString("en-IN")}</strong><span class="pen">✏️</span></td>
+        <td class="click" data-expiry="${e}">${expHtml}<span class="pen">✏️</span></td>
+        <td>${st}</td>
+        <td class="muted">${fmtTime(u.last_seen)}</td>
+        <td class="click" data-note="${e}">${esc(u.note || "")}<span class="pen">✏️</span></td>
+        <td><select class="act-sel" data-act="${e}">
+          <option value="" selected disabled>⚙️ Action Chuno...</option>
+          <option value="portal">🔑 Portal ID (likho / badlo)</option>
+          <option value="cost">💲 Is user ka credit daam</option>
+          <option value="upload">${u.allow_upload === false ? "📁 Upload box ON karo" : "📁 Upload box OFF karo"}</option>
+          <option value="chat">💬 Chat</option>
+          <option value="device">💻 Device / Multi-PC Manager</option>
+          <option value="logs">📊 Credit Usage Logs</option>
+          <option value="plan">💎 Is user ko Plan bhejo</option>
+          <option value="credit">💰 Credits badlo</option>
+          <option value="expiry">📅 Expiry badlo</option>
+          <option value="toggle">${u.enabled ? "❌ User ko OFF karo" : "✅ User ko ON karo"}</option>
+        </select></td></tr>`;
+    }).join("")
+  }</tbody></table>`;
+}
+$("userSearch").oninput = renderUsers;
+$("allUsersTable").addEventListener("click", (ev) => {
+  const t = ev.target.closest("[data-credit],[data-expiry],[data-note]");
+  if (!t) return;
+  if (t.dataset.credit) openCredit(t.dataset.credit);
+  else if (t.dataset.expiry) openExpiry(t.dataset.expiry);
+  else if (t.dataset.note) editNote(t.dataset.note);
+});
+$("allUsersTable").addEventListener("change", (ev) => {
+  const s = ev.target.closest("select[data-act]");
+  if (!s) return;
+  const a = s.value, email = s.dataset.act; s.value = "";
+  if (a === "portal") openPortal(email);
+  else if (a === "cost") openCost(email);
+  else if (a === "upload") toggleUpload(email);
+  else if (a === "chat") openChat(email);
+  else if (a === "device") openDevice(email);
+  else if (a === "logs") openUsage(email);
+  else if (a === "plan") openPlan(email);
+  else if (a === "credit") openCredit(email);
+  else if (a === "expiry") openExpiry(email);
+  else if (a === "toggle") toggleUser(email);
+});
+const userOf = (email) => users.find((x) => x.email === email);
+async function update(email, patch, okMsg) {
+  await api("user_update", { email, ...patch });
+  toast(okMsg || "✅ Badal gaya"); await loadUsers(); loadOverview();
+}
+async function toggleUser(email) {
+  const u = userOf(email); if (!u) return;
+  if (u.enabled && !confirm(`${email} ko OFF karein? Uski Server Entry ruk jaayegi.`)) return;
+  try { await update(email, { enabled: !u.enabled }); } catch (e) { toast(errTxt(e)); }
+}
+// 📁 Upload box (report upload + Patient List + Bulk Check) ON / OFF — default ON
+async function toggleUpload(email) {
+  const u = userOf(email); if (!u) return;
+  const on = u.allow_upload === false; // abhi OFF hai to ON karo
+  if (!on && !confirm(`${email} ka 📁 Upload box (report upload / Patient List / Bulk Check) OFF karein?\nSearch / card / queue chalte rahenge.`)) return;
+  try { await update(email, { allow_upload: on }, on ? "📁 Upload box ON" : "📁 Upload box OFF"); } catch (e) { toast(errTxt(e)); }
+}
+async function editNote(email) {
+  const u = userOf(email); const n = prompt(`${email} — Note:`, (u && u.note) || "");
+  if (n === null) return;
+  try { await update(email, { note: n }, "✅ Note save"); } catch (e) { toast(errTxt(e)); }
+}
+
+// ---------- modals ----------
+function openModal(id, email) {
+  curEmail = email;
+  document.querySelectorAll(`#${id} [data-m-email]`).forEach((x) => (x.textContent = email));
+  document.querySelectorAll(`#${id} .msg-err`).forEach((x) => (x.textContent = ""));
+  $(id).classList.add("open");
+}
+function closeModals() { document.querySelectorAll(".modal.open").forEach((m) => m.classList.remove("open")); }
+document.addEventListener("click", (ev) => {
+  if (ev.target.closest("[data-close]") || ev.target.classList.contains("modal")) closeModals();
+});
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") closeModals(); });
+
+// 💰 credit
+function openCredit(email) {
+  const u = userOf(email); if (!u) return;
+  $("cmNow").textContent = (u.credits || 0).toLocaleString("en-IN"); $("cmExact").value = u.credits || 0; $("cmAdj").value = ""; $("cmNote").value = "";
+  openModal("creditModal", email);
+}
+document.querySelectorAll("#creditModal [data-exact]").forEach((b) => (b.onclick = () => ($("cmExact").value = b.dataset.exact)));
+document.querySelectorAll("#creditModal [data-adj]").forEach((b) => (b.onclick = () => ($("cmAdj").value = b.dataset.adj)));
+async function adjust(delta) {
+  if (!delta) { $("cmErr").textContent = "Koi badlav nahi"; return; }
+  try {
+    const r = await api("user_adjust", { email: curEmail, delta, note: $("cmNote").value });
+    closeModals(); toast(`✅ Ab ${r.credits} credit`); await loadUsers(); loadOverview();
+  } catch (e) { $("cmErr").textContent = errTxt(e); }
+}
+$("cmExactBtn").onclick = () => { const u = userOf(curEmail); const target = Math.trunc(Number($("cmExact").value)); if (!(target >= 0)) { $("cmErr").textContent = "0 ya zyada"; return; } adjust(target - (u.credits || 0)); };
+$("cmAdjBtn").onclick = () => adjust(Math.trunc(Number($("cmAdj").value)) || 0);
+
+// 📅 expiry
+function openExpiry(email) {
+  const u = userOf(email); if (!u) return;
+  $("emNow").textContent = u.expiry_date ? fmtDate(u.expiry_date) + (new Date(u.expiry_date) < new Date() ? " (khatam)" : "") : "♾️ Hamesha";
+  $("emDate").value = u.expiry_date ? new Date(u.expiry_date).toLocaleDateString("en-CA", IST) : "";
+  openModal("expiryModal", email);
+}
+async function setExpiry(iso, msg) {
+  try { await update(curEmail, { expiry_date: iso }, msg); closeModals(); } catch (e) { $("emErr").textContent = errTxt(e); }
+}
+document.querySelectorAll("#expiryModal [data-days]").forEach((b) => (b.onclick = () => {
+  const u = userOf(curEmail); const base = u && u.expiry_date && new Date(u.expiry_date) > new Date() ? new Date(u.expiry_date) : new Date();
+  base.setDate(base.getDate() + Number(b.dataset.days));
+  setExpiry(base.toISOString(), `✅ Validity +${b.dataset.days} din`);
+}));
+$("emDateBtn").onclick = () => { const v = $("emDate").value; if (!v) { $("emErr").textContent = "Date chuno"; return; } setExpiry(v + "T23:59:59+05:30", "✅ Date set"); };
+$("emLifetime").onclick = () => setExpiry(null, "✅ Ab hamesha");
+$("emExpireNow").onclick = () => { if (confirm(`${curEmail} ki validity abhi khatam karein?`)) setExpiry(new Date().toISOString(), "⛔ Expire kar diya"); };
+
+// 💻 device
+function openDevice(email) {
+  const u = userOf(email); if (!u) return;
+  $("dmNow").innerHTML = u.device_id === "ANY" ? "♾️ Unlimited — kisi bhi PC se" : u.device_id ? `🔒 Ek PC se bandha <span class="muted">(${esc(u.device_id.slice(0, 8))}…)</span>` : "⚪ Abhi kisi PC se nahi (agle login pe bandhega)";
+  openModal("deviceModal", email);
+}
+document.querySelectorAll("#deviceModal [data-dev]").forEach((b) => (b.onclick = async () => {
+  try { await update(curEmail, { device_id: b.dataset.dev }, b.dataset.dev === "ANY" ? "✅ Unlimited PC" : "✅ PC reset — agla login bandhega"); closeModals(); }
+  catch (e) { $("dmErr").textContent = errTxt(e); }
+}));
+
+// 🔑 portal
+function openPortal(email) {
+  const u = userOf(email); if (!u) return;
+  $("pmNow").textContent = u.portal_user === "ANY" ? "♾️ Koi bhi portal ID" : u.portal_user ? "👤 " + u.portal_user : "⚠️ Koi ID nahi — user ka extension band hai (neeche ID likho)";
+  $("pmSet").value = u.portal_user && u.portal_user !== "ANY" ? u.portal_user : "";
+  openModal("portalModal", email);
+}
+async function setPortal(v, msg) {
+  try { await update(curEmail, { portal_user: v }, msg); closeModals(); } catch (e) { $("pmErr").textContent = errTxt(e); }
+}
+document.querySelectorAll("#portalModal [data-portal]").forEach((b) => (b.onclick = () => {
+  if (!b.dataset.portal && !confirm(`${curEmail} ki portal ID hatayein? Uska extension band ho jaayega jab tak aap nayi ID na likho.`)) return;
+  setPortal(b.dataset.portal, b.dataset.portal === "ANY" ? "✅ Koi bhi ID" : "🗑 Portal ID hata di — extension band");
+}));
+$("pmSetBtn").onclick = () => { const v = $("pmSet").value.trim(); if (!v) { $("pmErr").textContent = "ID likho"; return; } setPortal(v, "✅ Portal ID set"); };
+
+// 💲 is user ka daam (khaali = ⚙️ Credit Cost Settings wala)
+function openCost(email) {
+  const u = userOf(email); if (!u) return;
+  const all = `sabke liye: naya ${$("stNew").value} / purana ${$("stEx").value}`;
+  $("cstNow").textContent = u.cost_new != null || u.cost_existing != null
+    ? `💲 Apna daam: naya ${u.cost_new ?? "(sabke jaisa)"} / purana ${u.cost_existing ?? "(sabke jaisa)"} — ${all}` : `Sabke jaisa (${all})`;
+  $("cstNew").value = u.cost_new ?? ""; $("cstEx").value = u.cost_existing ?? "";
+  openModal("costModal", email);
+}
+$("cstSave").onclick = async () => {
+  try { await update(curEmail, { cost_new: $("cstNew").value.trim(), cost_existing: $("cstEx").value.trim() }, "✅ Is user ka daam save"); closeModals(); }
+  catch (e) { $("cstErr").textContent = errTxt(e); }
+};
+$("cstReset").onclick = async () => {
+  try { await update(curEmail, { cost_new: "", cost_existing: "" }, "↩ Ab sabke jaisa daam"); closeModals(); }
+  catch (e) { $("cstErr").textContent = errTxt(e); }
+};
+
+// 📊 usage
+async function openUsage(email) {
+  openModal("usageModal", email);
+  $("usageBody").innerHTML = `<div class="loading-text">Loading...</div>`;
+  try {
+    const r = await api("usage", { email });
+    const days = {};
+    (r.entries || []).forEach((x) => {
+      const k = dayKey(x.created_at); days[k] = days[k] || { n: 0, e: 0, c: 0 };
+      if (x.kind === "new") days[k].n++; else days[k].e++; days[k].c += x.cost;
+    });
+    const keys = Object.keys(days).sort().reverse();
+    const total = keys.reduce((s, k) => s + days[k].c, 0);
+    const AB = { same_pc_new_email: "Ek PC pe nayi Gmail", other_pc: "Doosre PC se login", other_pc_entry: "Doosre PC se entry", other_portal_id: "Doosri portal ID", same_portal_two_accounts: "Ek portal ID 2 account" };
+    $("usageBody").innerHTML = `
+      <div class="modal-sec"><h4>Kul ${(r.entries || []).length} entry · ${total} credit</h4>
+      <table class="user-table"><thead><tr><th>📅 Date</th><th style="text-align:center;">🆕 Naya / 👪 Purana</th><th style="text-align:right;">⚡ Credit</th></tr></thead><tbody>${
+        keys.map((k) => `<tr><td>${esc(new Date(k + "T12:00:00+05:30").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }))}</td>
+          <td style="text-align:center;">${days[k].n} / ${days[k].e}</td><td class="num" style="color:#00e094;font-weight:700;">${days[k].c}</td></tr>`).join("")
+        || `<tr><td colspan="3" class="muted">Koi entry nahi</td></tr>`}</tbody></table></div>
+      <div class="modal-sec"><h4>Admin ne diya / kaata</h4>
+      <table class="user-table"><tbody>${(r.adjusts || []).map((x) => `<tr><td class="muted">${fmtTime(x.created_at)}</td>
+        <td class="num" style="color:${x.delta > 0 ? "#00e094" : "#fca5a5"};font-weight:700;">${x.delta > 0 ? "+" : ""}${x.delta}</td><td class="num">${x.credits_after}</td><td>${esc(x.note || "")}</td></tr>`).join("")
+        || `<tr><td class="muted">Kuch nahi</td></tr>`}</tbody></table></div>
+      <div class="modal-sec"><h4>🚨 Dhokhe ki koshish</h4>
+      <table class="user-table"><tbody>${(r.abuse || []).map((x) => `<tr><td class="muted">${fmtTime(x.created_at)}</td><td><span class="status-badge status-expired">${esc(AB[x.kind] || x.kind)}</span></td><td class="muted">${esc(x.other || "")}</td></tr>`).join("")
+        || `<tr><td class="muted">Kuch nahi 👍</td></tr>`}</tbody></table></div>`;
+  } catch (e) { $("usageBody").innerHTML = `<div class="loading-text">${esc(errTxt(e))}</div>`; }
+}
+
+// 💎 personal plan
+function openPlan(email) {
+  const mine = plans.filter((p) => p.for_email === email);
+  $("plmList").innerHTML = mine.length ? mine.map((p) => `${p.active ? "✅" : "❌"} ${esc(p.name)} — ₹${p.price_inr} · ${p.credits} credit${p.validity_days ? ` · ${p.validity_days} din` : ""}`).join("<br>") : "Koi alag plan nahi (sabke liye wale dikhenge)";
+  ["plmName", "plmPrice", "plmCredits", "plmDays"].forEach((id) => ($(id).value = ""));
+  openModal("planModal", email);
+}
+$("plmSave").onclick = async () => {
+  try {
+    await api("plan_save", { plan: {
+      id: curEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, "").slice(0, 20) + "_" + Date.now().toString(36),
+      name: $("plmName").value || `${$("plmCredits").value} credit`, price_inr: $("plmPrice").value, credits: $("plmCredits").value,
+      validity_days: $("plmDays").value, for_email: curEmail, active: true,
+    } });
+    closeModals(); toast("✅ Plan bhej diya — user ke Recharge me dikhega"); loadPlans();
+  } catch (e) { $("plmErr").textContent = errTxt(e); }
+};
+
+// ---------- bulk ----------
+$("bulkGiveBtn").onclick = async () => {
+  const n = Math.trunc(Number($("bulkCredits").value));
+  if (!(n > 0)) return toast("Credit daalo");
+  if (!confirm(`Sabhi chalu users ko ${n} credit dein?`)) return;
+  try { const r = await api("bulk_adjust", { delta: n, note: $("bulkNote").value }); toast(`🎁 ${r.done}/${r.total} users ko diya`); $("bulkCredits").value = ""; loadUsers(); loadOverview(); }
+  catch (e) { toast(errTxt(e)); }
+};
+$("singleGiveBtn").onclick = async () => {
+  const email = $("singleEmail").value.trim().toLowerCase(), n = Math.trunc(Number($("singleCredits").value));
+  if (!email || !(n > 0)) return toast("Email aur credit daalo");
+  try { const r = await api("user_adjust", { email, delta: n, note: "bulk panel" }); toast(`✅ ${email}: ab ${r.credits}`); $("singleCredits").value = ""; loadUsers(); loadOverview(); }
+  catch (e) { toast(errTxt(e)); }
+};
+$("addUserBtn").onclick = async () => {
+  const email = $("newEmail").value.trim().toLowerCase();
+  try {
+    await api("user_add", { email, credits: $("newCredits").value || 0, note: $("newNote").value, portal_user: $("newPortal").value });
+    const d = Math.trunc(Number($("newDays").value));
+    if (d > 0) { const t = new Date(); t.setDate(t.getDate() + d); await api("user_update", { email, expiry_date: t.toISOString() }); }
+    toast(`✅ User add ho gaya${$("newPortal").value.trim() ? "" : " — ⚠️ portal ID nahi: extension band rahega jab tak aap na likho"}`);
+    ["newEmail", "newCredits", "newDays", "newNote", "newPortal"].forEach((id) => ($(id).value = ""));
+    loadUsers(); loadOverview();
+  } catch (e) { toast(errTxt(e)); }
+};
+
+// ---------- plans ----------
+async function loadPlans() { try { plans = (await api("plans")).plans || []; renderPlans(); } catch (e) { toast(errTxt(e)); } }
+function renderPlans() {
+  $("plansTable").innerHTML = plans.length ? `<table class="user-table"><thead><tr><th>ID</th><th>Naam</th><th>₹</th><th>Credit</th><th>Validity</th><th>Kiske liye</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+    plans.map((p) => `<tr${p.active ? "" : ' style="opacity:.55;"'}><td class="muted">${esc(p.id)}</td><td><strong>${esc(p.name)}</strong></td>
+      <td style="color:#ffd700;font-weight:700;">₹${p.price_inr}</td><td style="color:#00e094;font-weight:700;">${p.credits}</td>
+      <td>${p.validity_days ? p.validity_days + " din" : '<span class="muted">♾️ Hamesha</span>'}</td>
+      <td>${p.for_email ? esc(p.for_email) : '<span class="muted">Sabko</span>'}</td>
+      <td>${p.active ? '<span class="status-badge status-active">Chalu</span>' : '<span class="status-badge status-expired">Band</span>'}</td>
+      <td style="white-space:nowrap;"><button class="btn btn-ghost btn-sm" data-pedit="${esc(p.id)}">✏️</button>
+        <button class="btn btn-ghost btn-sm" data-ptog="${esc(p.id)}">${p.active ? "Band" : "Chalu"}</button>
+        <button class="btn btn-red btn-sm" data-pdel="${esc(p.id)}">🗑</button></td></tr>`).join("")
+  }</tbody></table>` : `<div class="loading-text">Koi plan nahi</div>`;
+}
+function clearPlanForm() { ["pfId", "pfName", "pfPrice", "pfCredits", "pfDays", "pfEmail"].forEach((id) => ($(id).value = "")); $("pfActive").value = "1"; $("pfId").disabled = false; }
+$("pfClear").onclick = clearPlanForm;
+$("pfSave").onclick = async () => {
+  try {
+    await api("plan_save", { plan: {
+      id: $("pfId").value.trim() || "plan_" + Date.now().toString(36), name: $("pfName").value, price_inr: $("pfPrice").value,
+      credits: $("pfCredits").value, validity_days: $("pfDays").value, for_email: $("pfEmail").value, active: $("pfActive").value === "1",
+    } });
+    toast("✅ Plan save"); clearPlanForm(); loadPlans();
+  } catch (e) { toast(errTxt(e)); }
+};
+$("plansTable").addEventListener("click", async (ev) => {
+  const b = ev.target.closest("button"); if (!b) return;
+  const p = plans.find((x) => x.id === (b.dataset.pedit || b.dataset.ptog || b.dataset.pdel)); if (!p) return;
+  try {
+    if (b.dataset.pedit) {
+      $("pfId").value = p.id; $("pfId").disabled = true; $("pfName").value = p.name; $("pfPrice").value = p.price_inr; $("pfCredits").value = p.credits;
+      $("pfDays").value = p.validity_days || ""; $("pfEmail").value = p.for_email || ""; $("pfActive").value = p.active ? "1" : "0";
+      $("planForm").scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if (b.dataset.ptog) { await api("plan_save", { plan: { ...p, active: !p.active } }); toast("✅ Badal gaya"); loadPlans(); }
+    else if (b.dataset.pdel) { if (!confirm(`Plan "${p.name}" hatayein?`)) return; await api("plan_delete", { id: p.id }); toast("🗑 Hata diya"); loadPlans(); }
+  } catch (e) { toast(errTxt(e)); }
+});
+
+// ---------- breakdown / payments / abuse / settings ----------
+function renderBreakdown() {
+  const paid = payments.filter((p) => p.status === "paid");
+  const by = {};
+  paid.forEach((p) => { const k = p.plan_id || "?"; by[k] = by[k] || { n: 0, r: 0 }; by[k].n++; by[k].r += Math.round((p.amount_paise || 0) / 100); });
+  const keys = Object.keys(by).sort((a, b) => by[b].n - by[a].n);
+  const max = Math.max(1, ...keys.map((k) => by[k].n));
+  $("planBreakdown").innerHTML = keys.length ? keys.map((k) => {
+    const pl = plans.find((p) => p.id === k);
+    return `<div class="plan-bar-item"><div class="plan-bar-label">${esc(pl ? pl.name : k)}</div><div class="plan-bar-track"><div class="plan-bar-fill" style="width:${Math.round(by[k].n / max * 100)}%"></div></div><div class="plan-bar-count">${by[k].n} · ₹${by[k].r}</div></div>`;
+  }).join("") : `<div class="loading-text">Abhi koi payment nahi</div>`;
+}
+async function loadPayments() { try { payments = (await api("payments")).payments || []; renderPayments(); } catch (e) { toast(errTxt(e)); } }
+function renderPayments() {
+  const q = $("paySearch").value.trim().toLowerCase();
+  const list = payments.filter((p) => !q || p.email.includes(q) || String(p.txn_id || "").toLowerCase().includes(q));
+  const st = { paid: '<span class="status-badge status-active">Paid</span>', failed: '<span class="status-badge status-expired">Fail</span>', created: '<span class="status-badge status-off">Adhoora</span>' };
+  $("paymentsTable").innerHTML = list.length ? `<table class="user-table"><thead><tr><th>Samay</th><th>Email</th><th>Plan</th><th>₹</th><th>Credit</th><th>Status</th><th>Txn</th><th>PayU ID</th></tr></thead><tbody>${
+    list.map((p) => `<tr><td class="muted">${fmtTime(p.paid_at || p.created_at)}</td><td>${esc(p.email)}</td><td>${esc(p.plan_id || "")}</td>
+      <td style="color:#ffd700;font-weight:700;">₹${Math.round((p.amount_paise || 0) / 100)}</td><td>${p.credits}</td><td>${st[p.status] || esc(p.status)}</td>
+      <td class="muted">${esc(p.txn_id || "")}</td><td class="muted">${esc(p.payment_id || "")}</td></tr>`).join("")
+  }</tbody></table>` : `<div class="loading-text">Koi payment nahi</div>`;
+}
+$("paySearch").oninput = renderPayments;
+async function loadAbuse() {
+  try {
+    abuse = (await api("usage", {})).abuse || [];
+    const AB = { same_pc_new_email: "Ek PC pe nayi Gmail", other_pc: "Doosre PC se login", other_pc_entry: "Doosre PC se entry", other_portal_id: "Doosri portal ID", same_portal_two_accounts: "Ek portal ID 2 account" };
+    $("abuseTable").innerHTML = abuse.length ? `<table class="user-table"><thead><tr><th>Samay</th><th>Email</th><th>Kya</th><th>Doosra</th></tr></thead><tbody>${
+      abuse.map((x) => `<tr><td class="muted">${fmtTime(x.created_at)}</td><td>${esc(x.email)}</td><td><span class="status-badge status-expired">${esc(AB[x.kind] || x.kind)}</span></td><td class="muted">${esc(x.other || "")}</td></tr>`).join("")
+    }</tbody></table>` : `<div class="loading-text">Kuch nahi 👍</div>`;
+  } catch (e) { toast(errTxt(e)); }
+}
+async function loadSettings() {
+  try {
+    const s = (await api("settings")).settings; $("stNew").value = s.cost_new; $("stEx").value = s.cost_existing; $("stFree").value = s.free_signup_credits;
+    $("inviteOnly").checked = s.invite_only !== false;
+  }
+  catch (e) { toast(errTxt(e)); }
+}
+$("stSave").onclick = async () => {
+  try { await api("settings_save", { cost_new: $("stNew").value, cost_existing: $("stEx").value, free_signup_credits: $("stFree").value }); toast("✅ Settings save"); }
+  catch (e) { toast(errTxt(e)); }
+};
+
+// ---------- 💬 chat ----------
+let chats = [], chatEmail = "", chatTimer = null;
+async function loadChats() {
+  try {
+    chats = (await api("chat_list")).chats || [];
+    const unread = chats.reduce((s, c) => s + c.unread, 0);
+    $("chatUnread").textContent = unread; $("chatUnread").classList.toggle("hidden", !unread);
+    renderChatList();
+    if (chatEmail) loadThread(true);
+  } catch (e) { $("chatList").innerHTML = `<div class="loading-text">${esc(errTxt(e))}</div>`; }
+}
+function renderChatList() {
+  $("chatList").innerHTML = chats.length ? chats.map((c) => `<div class="chat-item${c.email === chatEmail ? " on" : ""}" data-chat="${esc(c.email)}">
+    <b><span>${esc(c.email)}</span>${c.unread ? `<span class="chat-unread">${c.unread}</span>` : ""}</b>
+    <p>${c.fromAdmin ? "Aap: " : ""}${esc(c.last)}</p><p style="font-size:10px;">${fmtTime(c.at)}</p></div>`).join("")
+    : `<div class="loading-text">Abhi koi sandesh nahi</div>`;
+}
+async function loadThread(quiet) {
+  if (!chatEmail) return;
+  try {
+    const msgs = (await api("chat_thread", { email: chatEmail })).messages || [];
+    const box = $("chatMsgs"), atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    box.innerHTML = msgs.length ? msgs.map((m) => `<div class="chat-bub ${m.from_admin ? "admin" : "user"}">${esc(m.body)}<small>${fmtTime(m.created_at)}${m.from_admin && m.seen_at ? " · ✔✔ padha" : ""}</small></div>`).join("")
+      : `<div class="loading-text">Koi sandesh nahi — pehla aap bhejo</div>`;
+    if (!quiet || atEnd) box.scrollTop = box.scrollHeight;
+    const c = chats.find((x) => x.email === chatEmail);
+    if (c && c.unread) { c.unread = 0; renderChatList(); const n = chats.reduce((s, x) => s + x.unread, 0); $("chatUnread").textContent = n; $("chatUnread").classList.toggle("hidden", !n); }
+  } catch (e) { if (!quiet) toast(errTxt(e)); }
+}
+function openChat(email) {
+  chatEmail = email;
+  $("chatHead").textContent = "💬 " + email;
+  $("chatInput").disabled = $("chatSendBtn").disabled = false;
+  renderChatList(); loadThread();
+  $("chatPanelBox").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("chatInput").focus();
+}
+async function sendChat() {
+  const body = $("chatInput").value.trim();
+  if (!body || !chatEmail) return;
+  $("chatSendBtn").disabled = true;
+  try { await api("chat_send", { email: chatEmail, body }); $("chatInput").value = ""; await loadThread(); loadChats(); }
+  catch (e) { toast(errTxt(e)); }
+  $("chatSendBtn").disabled = false; $("chatInput").focus();
+}
+$("chatList").addEventListener("click", (ev) => { const it = ev.target.closest("[data-chat]"); if (it) openChat(it.dataset.chat); });
+$("chatSendBtn").onclick = sendChat;
+$("chatInput").onkeydown = (e) => { if (e.key === "Enter") sendChat(); };
+$("chatRefresh").onclick = loadChats;
+function chatPoll(on) { clearInterval(chatTimer); chatTimer = on ? setInterval(() => { if (pass && !document.hidden) loadChats(); }, 30000) : null; }
+
+// yaad rakha password ho to khud khule
+(() => {
+  let p = ""; try { p = localStorage.getItem(PASS_KEY) || ""; } catch (e) {}
+  if (p) { $("pwRemember").checked = true; unlock(p, true); }
+})();
+</script>
+</body>
+</html>
