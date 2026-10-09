@@ -1538,49 +1538,14 @@
         } else if (data && data.success === false) {
           statusEl.innerHTML = '<span style="color:#ff4d6d;">❌ ' + (data.error || 'Access denied!') + '</span>';
         } else {
-          // Try direct table update as fallback
-          await saveBannerDirect(enabled, title, message, buttonText, statusEl);
+          statusEl.innerHTML = '<span style="color:#ff4d6d;">❌ Server error: ' + escapeHtml(JSON.stringify(data)) + '</span>';
         }
       } catch (e) {
-        // Fallback: Direct table update
-        await saveBannerDirect(enabled, title, message, buttonText, statusEl);
+        statusEl.innerHTML = '<span style="color:#ff4d6d;">❌ Network error: ' + escapeHtml(e.message) + '</span>';
       }
 
       saveBtn.disabled = false;
       saveBtn.textContent = '💾 Save & Publish Banner';
-    }
-
-    // Fallback: Direct table update (if RPC not available)
-    async function saveBannerDirect(enabled, title, message, buttonText, statusEl) {
-      try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/app_settings?id=eq.1', {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify({
-            banner_enabled: enabled,
-            banner_title: title,
-            banner_message: message,
-            banner_button_text: buttonText
-          })
-        });
-        if (res.ok || res.status === 204) {
-          if (enabled) {
-            statusEl.innerHTML = '<span style="color:#00e094;font-weight:700;">✅ Banner saved (direct) & LIVE! Ab users ko dikhega.</span>';
-          } else {
-            statusEl.innerHTML = '<span style="color:#ff4d6d;font-weight:700;">🔴 Banner successfully OFF ho gaya! Ab users ko NAHI dikhega.</span>';
-          }
-          updateLiveStatus(enabled);
-        } else {
-          const errText = await res.text();
-          statusEl.innerHTML = '<span style="color:#ff4d6d;">❌ Error: ' + errText + '</span>';
-        }
-      } catch (e2) {
-        statusEl.innerHTML = '<span style="color:#ff4d6d;">❌ Network error: ' + e2.message + '</span>';
-      }
     }
 
     // Disable banner quick button
@@ -1746,26 +1711,23 @@
       statusEl.innerHTML = '<span style="color:#ffb347;">⏳ Settings Supabase mein save ho rahi hain...</span>';
 
       try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/app_settings?id=eq.1', {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal'
-          },
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_tab_settings', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            pro_user_enabled: proEnabled,
-            ihms_tabs_enabled: ihmsEnabled,
-            hid_upload_enabled: hidEnabled
+            p_password: adminPassword,
+            p_pro_enabled: proEnabled,
+            p_ihms_enabled: ihmsEnabled,
+            p_hid_enabled: hidEnabled
           })
         });
+        const data = await res.json().catch(() => null);
 
-        if (res.ok || res.status === 204) {
+        if (data && data.success === true) {
           statusEl.innerHTML = '<span style="color:#00e094;font-weight:700;">✅ Tab Settings successfully saved! Live users ke liye update ho gaya.</span>';
           updateTabUIStatus(proEnabled, ihmsEnabled, hidEnabled);
         } else {
-          const errText = await res.text();
-          statusEl.innerHTML = '<span style="color:#ff4d6d;">❌ Save error: ' + errText + '</span>';
+          statusEl.innerHTML = '<span style="color:#ff4d6d;">❌ Save error: ' + escapeHtml(JSON.stringify(data)) + '</span>';
         }
       } catch (err) {
         statusEl.innerHTML = '<span style="color:#ff4d6d;">❌ Error: ' + err.message + '</span>';
@@ -1790,10 +1752,11 @@
       statusEl.innerHTML = '<span style="color:#ffb347;">⏳ Sending...</span>';
 
       try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/set_user_banner', {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_banner', {
           method: 'POST',
           headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            p_password: adminPassword,
             p_email: email,
             p_enabled: true,
             p_title: title,
@@ -1823,10 +1786,10 @@
       statusEl.innerHTML = '<span style="color:#ffb347;">⏳ Removing...</span>';
 
       try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/set_user_banner', {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_banner', {
           method: 'POST',
           headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ p_email: email, p_enabled: false })
+          body: JSON.stringify({ p_password: adminPassword, p_email: email, p_enabled: false })
         });
         const data = await res.json();
         if (data === 'DONE') {
@@ -2759,23 +2722,6 @@
           } catch(e2) {}
         }
 
-        // 3. Direct REST Fallback
-        if (!success) {
-          try {
-            const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-              method: 'PATCH',
-              headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + SUPABASE_KEY,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-              },
-              body: JSON.stringify({ pro_user_enabled: enable })
-            });
-            if (patchRes.ok) success = true;
-          } catch(e3) {}
-        }
-
         if (success) {
           const u = allUsers.find(x => x.email.toLowerCase() === email.toLowerCase());
           if (u) u.pro_user_enabled = enable;
@@ -2829,23 +2775,6 @@
           } catch(e2) {}
         }
 
-        // 3. Direct REST Fallback
-        if (!success) {
-          try {
-            const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-              method: 'PATCH',
-              headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + SUPABASE_KEY,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-              },
-              body: JSON.stringify({ ihms_tabs_enabled: enable })
-            });
-            if (patchRes.ok) success = true;
-          } catch(e3) {}
-        }
-
         if (success) {
           const u = allUsers.find(x => x.email.toLowerCase() === email.toLowerCase());
           if (u) u.ihms_tabs_enabled = enable;
@@ -2878,23 +2807,6 @@
             success = true;
           }
         } catch(rpcE) {}
-
-        // 2. Direct REST Fallback
-        if (!success) {
-          try {
-            const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-              method: 'PATCH',
-              headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + SUPABASE_KEY,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-              },
-              body: JSON.stringify({ smart_bulk_enabled: enable })
-            });
-            if (patchRes.ok) success = true;
-          } catch(e3) {}
-        }
 
         if (success) {
           const u = allUsers.find(x => x.email.toLowerCase() === email.toLowerCase());
@@ -2945,23 +2857,6 @@
               success = true;
             }
           } catch(e2) {}
-        }
-
-        // 3. Direct REST Fallback
-        if (!success) {
-          try {
-            const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-              method: 'PATCH',
-              headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + SUPABASE_KEY,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-              },
-              body: JSON.stringify({ hid_upload_enabled: enable })
-            });
-            if (patchRes.ok) success = true;
-          } catch(e3) {}
         }
 
         if (success) {
@@ -3015,23 +2910,6 @@
               success = true;
             }
           } catch(e2) {}
-        }
-
-        // 3. Direct REST Fallback
-        if (!success) {
-          try {
-            const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-              method: 'PATCH',
-              headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + SUPABASE_KEY,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation'
-              },
-              body: JSON.stringify({ speed_boost_enabled: enable })
-            });
-            if (patchRes.ok) success = true;
-          } catch(e3) {}
         }
 
         if (success) {
@@ -3093,7 +2971,6 @@
 
       try {
         let success = false;
-        const newDeviceId = (mode === 'PERMANENT_ANY') ? 'ANY' : null;
 
         // 1. Try RPC first
         try {
@@ -3108,19 +2985,9 @@
           }
         } catch (rpcE) {}
 
-        // 2. Direct REST Fallback
         if (!success) {
-          const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-            method: 'PATCH',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({ device_id: newDeviceId })
-          });
-          if (patchRes.ok) success = true;
+          alert('❌ Device reset save nahi hua! Password check karke dobara login karein.');
+          return;
         }
 
         const u = allUsers.find(x => x.email.toLowerCase() === email.toLowerCase());
@@ -3207,32 +3074,11 @@
             success = true;
           } else if (data === 'USER_NOT_FOUND') {
             errorMsg = 'User not found in database!';
-          }
-        } catch(e) {}
-
-        // Direct REST fallback
-        if (!success && !errorMsg) {
-          const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-            method: 'PATCH',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({
-              custom_manual_credit_cost: manualVal,
-              pro_manual_credit_cost: manualVal,
-              pro_bulk_credit_cost: bulkVal,
-              custom_credit_cost: manualVal
-            })
-          });
-          if (patchRes.ok) {
-            success = true;
           } else {
-            const errJson = await patchRes.json().catch(() => null);
-            errorMsg = errJson ? (errJson.message || JSON.stringify(errJson)) : 'Update failed (Run SQL in Supabase)';
+            errorMsg = 'Server ne mana kiya: ' + JSON.stringify(data);
           }
+        } catch(e) {
+          errorMsg = e.message;
         }
 
         if (success) {
@@ -3284,25 +3130,6 @@
           }
         } catch(e) {}
 
-        // Direct REST fallback
-        if (!success) {
-          const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email), {
-            method: 'PATCH',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({
-              custom_manual_credit_cost: null,
-              pro_bulk_credit_cost: null,
-              custom_credit_cost: null
-            })
-          });
-          if (patchRes.ok) success = true;
-        }
-
         if (success) {
           alert('✅ Reset Done!\n\n"' + email + '" ka HID cost ab default (1 credit/HID) hai.');
           const u = allUsers.find(x => x.email === email);
@@ -3313,7 +3140,7 @@
           }
           renderAllUsers();
         } else {
-          alert('❌ Reset failed. Please run SQL function in Supabase.');
+          alert('❌ Reset failed! Password check karke dobara login karein.');
         }
       } catch (e) {
         alert('❌ Network error: ' + e.message);
@@ -3396,32 +3223,13 @@
             })
           });
           const data = await res.json().catch(() => null);
-          if (res.ok && data !== 'USER_NOT_FOUND' && data !== 'DENIED') {
-            success = true;
-          }
-        } catch(rpcErr) {}
-
-        // Direct REST fallback
-        if (!success) {
-          const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-            method: 'PATCH',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({
-              server_hid_delay: hidVal,
-              server_api_delay: apiVal
-            })
-          });
-          if (patchRes.ok) {
+          if (data === 'DONE') {
             success = true;
           } else {
-            const errJson = await patchRes.json().catch(() => null);
-            errorMsg = errJson ? (errJson.message || JSON.stringify(errJson)) : 'Update failed';
+            errorMsg = JSON.stringify(data);
           }
+        } catch(rpcErr) {
+          errorMsg = rpcErr.message;
         }
 
         if (success) {
@@ -3448,21 +3256,14 @@
       closeSpeedModal();
 
       try {
-        const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=ilike.' + encodeURIComponent(email.trim()), {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify({
-            server_hid_delay: 7500,
-            server_api_delay: 300
-          })
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_speed', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: adminPassword, p_user_email: email, p_hid_delay: 7500, p_api_delay: 300 })
         });
+        const data = await res.json().catch(() => null);
 
-        if (patchRes.ok) {
+        if (data === 'DONE') {
           alert('✅ Reset Done!\n\n"' + email + '" ki speed default (7.5s / 300ms) ho gayi hai.');
           const u = allUsers.find(x => x.email.toLowerCase() === email.toLowerCase());
           if (u) {
@@ -3480,57 +3281,26 @@
 
     // ===== MANUAL GRANT BONUS (+10 DAYS & +1,000 CREDITS) =====
     async function adminGrantBonus(email) {
-      const user = allUsers.find(u => u.email === email);
-
       if (!confirm(`🎁 "${email}" ko MANUALLY Referral Bonus dena hai?\n\nYe actions honge:\n• +10 Days Validity Add hogi\n• +1,000 Credits Add honge\n• User active/unlocked ho jayega!`)) return;
 
       try {
-        let success = false;
-        
-        // Method 1: Call grant_viral_cycle RPC
-        try {
-          const grantRes = await fetch(SUPABASE_URL + '/rest/v1/rpc/grant_viral_cycle', {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ p_email: email, p_google_token: '' })
-          });
-          const grantData = await grantRes.json();
-          if (grantData && grantData.length > 0 && grantData[0].success) {
-            success = true;
-          }
-        } catch(e) {}
-
-        // Method 2: Direct Database Update
-        if (!success) {
-          const now = new Date();
-          let baseDate = now;
-          if (user && user.expiry_date) {
-            const exp = new Date(user.expiry_date);
-            if (exp > now) baseDate = exp;
-          }
-          const newExpDate = new Date(baseDate.getTime() + (10 * 24 * 60 * 60 * 1000));
-          const newCredits = (user && user.credits ? user.credits : 0) + 1000;
-
-          const patchRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email), {
-            method: 'PATCH',
-            headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-            body: JSON.stringify({
-              credits: newCredits,
-              expiry_date: newExpDate.toISOString(),
-              viral_referrals_confirmed: (user && user.viral_referrals_confirmed ? user.viral_referrals_confirmed : 0) + 1,
-              viral_locked: false,
-              is_disabled: false
-            })
-          });
-          if (patchRes.ok) success = true;
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_grant_bonus', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: adminPassword, p_user_email: email })
+        });
+        const data = await res.json().catch(() => null);
+        if (data !== 'DONE') {
+          alert('❌ Bonus nahi diya gaya: ' + JSON.stringify(data));
+          return;
         }
 
-        // Method 3: Give Credits RPC as safety net
+        // User ke chat mein message (sirf notification — credits upar wale function ne de diye)
         try {
-          await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_give_credits', {
+          await fetch(SUPABASE_URL + '/rest/v1/rpc/send_admin_message', {
             method: 'POST',
             headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ p_password: adminPassword, p_user_email: email, p_credits: 1000, p_message: `🎉 Admin ne aapko +10 Days Validity & +1,000 Credits bonus gift kiye!` })
+            body: JSON.stringify({ p_password: adminPassword, p_user_email: email, p_message: `🎉 Admin ne aapko +10 Days Validity & +1,000 Credits bonus gift kiye!` })
           });
         } catch(e) {}
 
@@ -3616,44 +3386,19 @@
       btn.disabled = true; btn.textContent = '⏳ Adding...';
 
       try {
-        const payload = {
-          email: email,
-          credits: 1000,
-          plan: '299',
-          next_plan: '299',
-          status: 'active',
-          payment_status: 'paid',
-          expiry_date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString()
-        };
-
-        // Check if this email already has a row
-        const checkRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email) + '&select=id', {
-          headers: { 'apikey': SUPABASE_KEY }
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_add_user', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_password: adminPassword, p_email: email })
         });
-        const existing = await checkRes.json();
+        const data = await res.json().catch(() => null);
 
-        let res;
-        if (Array.isArray(existing) && existing.length > 0) {
-          res = await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email), {
-            method: 'PATCH',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-            body: JSON.stringify(payload)
-          });
-        } else {
-          res = await fetch(SUPABASE_URL + '/rest/v1/users', {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-            body: JSON.stringify(payload)
-          });
-        }
-
-        if (res.ok) {
+        if (data === 'DONE') {
           alert('✅ "' + email + '" add ho gaya!\n\n💰 1000 Credits\n📅 10 Din Validity\n🔁 Renewal par: ₹299 Plan (8000 Credits)');
           emailInput.value = '';
           await loadDashboard();
         } else {
-          const errText = await res.text();
-          alert('❌ Failed: ' + errText);
+          alert('❌ Failed: ' + JSON.stringify(data));
         }
       } catch (e) {
         alert('❌ Error: ' + e.message);

@@ -1278,15 +1278,11 @@
     async function setNextPlanInDb(email, planString) {
       const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '';
       try {
+        // admin_set_user_plan plan aur next_plan dono set karta hai
         await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_plan', {
           method: 'POST',
           headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({ p_password: pw, p_user_email: email, p_plan: planString })
-        });
-        await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(email), {
-          method: 'PATCH',
-          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-          body: JSON.stringify({ next_plan: planString })
         });
       } catch(e) {
         console.warn('Set next plan error:', e);
@@ -1312,31 +1308,8 @@
           })
         });
 
-        if (rpcRes.ok) {
-          const rpcData = await rpcRes.json().catch(() => null);
-          if (rpcData !== 'DENIED') {
-            sentSuccess = true;
-          }
-        }
-        
-        // Step 2: Fallback to direct POST if RPC not available
-        if (!sentSuccess) {
-          const directRes = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-            method: 'POST',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify({
-              user_email: activeUserEmail,
-              sender: 'admin',
-              message: msgText,
-              is_read: true
-            })
-          });
-          if (directRes.ok) sentSuccess = true;
-        }
+        const rpcData = await rpcRes.json().catch(() => null);
+        sentSuccess = rpcData === 'DONE';
 
         if (sentSuccess) {
           await loadAllChats();
@@ -1363,59 +1336,26 @@
       btn.textContent = '⏳ Activating in Database...';
 
       try {
-        // 1. Fetch current user state
-        const getRes = await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(activeUserEmail) + '&select=*', {
-          headers: { 'apikey': SUPABASE_KEY }
-        });
-        const users = await getRes.json();
-        const user = Array.isArray(users) && users.length > 0 ? users[0] : null;
-
-        const currentCredits = user ? (user.credits || 0) : 0;
-        const newCredits = currentCredits + creditsToAdd;
-
-        // Calculate new expiry date
-        const baseDate = (user && user.expiry_date && new Date(user.expiry_date) > new Date()) 
-          ? new Date(user.expiry_date) 
-          : new Date();
-        baseDate.setDate(baseDate.getDate() + daysToAdd);
-        const newExpiryStr = baseDate.toISOString();
-
-        // 2. Direct PATCH to users table
-        await fetch(SUPABASE_URL + '/rest/v1/users?email=eq.' + encodeURIComponent(activeUserEmail), {
-          method: 'PATCH',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-          },
+        // Credits jodna + din badhana + plan set — sab ek hi server function mein
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_activate_plan', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            credits: newCredits,
-            plan: planName,
-            next_plan: planName,
-            expiry_date: newExpiryStr,
-            is_disabled: false
+            p_password: pw,
+            p_user_email: activeUserEmail,
+            p_plan: planName,
+            p_add_credits: creditsToAdd,
+            p_add_days: daysToAdd
           })
         });
+        const result = await res.json().catch(() => null);
+        if (!result || result.success !== true) {
+          alert('❌ Plan activate nahi hua: ' + JSON.stringify(result));
+          return;
+        }
+        const newCredits = Number(result.credits) || 0;
 
-        // 3. Also invoke RPC admin_set_user_plan
-        try {
-          await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_plan', {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ p_password: pw, p_user_email: activeUserEmail, p_plan: planName })
-          });
-        } catch(e){}
-
-        // 4. Also invoke RPC admin_set_user_credits
-        try {
-          await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_credits', {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ p_password: pw, p_user_email: activeUserEmail, p_credits: newCredits })
-          });
-        } catch(e){}
-
-        // 5. Send Confirmation in Chat if selected
+        // Send Confirmation in Chat if selected
         if (sendMsg) {
           const assignCard = `[PLAN_ASSIGNED:${planName}:${creditsToAdd}]`;
           await sendAdminRawMessage(assignCard);
