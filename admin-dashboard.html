@@ -1910,9 +1910,8 @@
       if (pwError) pwError.textContent = '⏳ Checking...';
       if (pwBtn) pwBtn.disabled = true;
 
-      const knownMasterPasswords = ['9001113382', 'ihms2026', 'admin123', 'Admin@2026', 'entry2026', 'admin', 'password', '123456', 'dataentry'];
-      let isAuthorized = knownMasterPasswords.includes(pw) || knownMasterPasswords.includes(pw.toLowerCase());
-
+      // Password sirf server check karta hai (private.admin_auth) — page mein koi password nahi
+      let isAuthorized = false;
       try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/send_admin_message', {
           method: 'POST',
@@ -1920,23 +1919,11 @@
           body: JSON.stringify({ p_password: pw, p_user_email: 'test@test.com', p_message: '__auth_test__' })
         });
         const data = await res.json().catch(() => null);
-        if (data === 'DONE' || (typeof data === 'string' && data.includes('DONE')) || (data && data.success)) {
-          isAuthorized = true;
-        } else if (data === 'DENIED' && !isAuthorized) {
-          if (pwError) pwError.textContent = '❌ Galat password!';
-          if (pwBtn) pwBtn.disabled = false;
-          sessionStorage.removeItem('admin_dash_pw');
-          return;
-        }
-        // Delete test msg
-        try { await fetch(SUPABASE_URL + '/rest/v1/chat_messages?user_email=eq.test@test.com&message=eq.__auth_test__', { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); } catch(e){}
+        isAuthorized = data === 'DONE';
       } catch(e) {
-        // If RPC fails, allow master passwords
-        if (!isAuthorized) {
-          if (pwError) pwError.textContent = '❌ Galat password!';
-          if (pwBtn) pwBtn.disabled = false;
-          return;
-        }
+        if (pwError) pwError.textContent = '❌ Server se connect nahi ho paya, internet check karo!';
+        if (pwBtn) pwBtn.disabled = false;
+        return;
       }
 
       if (isAuthorized) {
@@ -1953,6 +1940,7 @@
       } else {
         if (pwError) pwError.textContent = '❌ Galat password!';
         if (pwBtn) pwBtn.disabled = false;
+        sessionStorage.removeItem('admin_dash_pw');
       }
     };
 
@@ -2089,7 +2077,7 @@
         const pct = total > 0 ? Math.round((count / total) * 100) : 0;
         const div = document.createElement('div');
         div.className = 'plan-bar-item';
-        div.innerHTML = '<div class="plan-bar-label">' + plan + '</div>' +
+        div.innerHTML = '<div class="plan-bar-label">' + escapeHtml(plan) + '</div>' +
           '<div class="plan-bar-track"><div class="plan-bar-fill" style="width:' + pct + '%"></div></div>' +
           '<div class="plan-bar-count">' + count + '</div>';
         container.appendChild(div);
@@ -2105,7 +2093,7 @@
         const dateVal = u.created_at || u.updated_at;
         const joined = dateVal ? new Date(dateVal).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '-';
         html += '<tr><td>' + escapeHtml(u.email) + '</td>' +
-          '<td>₹' + (u.plan || '0') + '</td>' +
+          '<td>₹' + escapeHtml(u.plan || '0') + '</td>' +
           '<td>' + joined + '</td></tr>';
       });
       html += '</tbody></table>';
@@ -2231,7 +2219,8 @@
       container.innerHTML = html;
     }
 
-    function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text || ''; return d.innerHTML; }
+    // " bhi escape karo — warna onclick="..." attribute se bahar nikal sakta hai
+    function escapeHtml(text) { const d = document.createElement('div'); d.textContent = text || ''; return d.innerHTML.replace(/"/g, '&quot;'); }
 
     // ===== ACTIONS DROPDOWN DISPATCHER =====
     function runUserAction(selectEl, email) {

@@ -820,37 +820,21 @@
       pwError.textContent = '⏳ Verifying...';
       pwBtn.disabled = true;
 
-      // Direct check for 9001113382
-      if (pass === '9001113382') {
-        adminPassword = pass;
-        sessionStorage.setItem('admin_dash_pw', pass);
-        pwScreen.style.display = 'none';
-        mainApp.style.display = 'flex';
-        initChatPortal();
-        return;
-      }
-
+      // Password sirf server check karta hai (private.admin_auth) — page mein koi password nahi
       try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/send_admin_message', {
           method: 'POST',
           headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({ p_password: pass, p_user_email: 'test@test.com', p_message: '__auth_test__' })
         });
-        const data = await res.json();
-        
-        if (data === 'DENIED') {
+        const data = await res.json().catch(() => null);
+
+        if (data !== 'DONE') {
           pwError.textContent = '❌ Galat password!';
           pwBtn.disabled = false;
+          sessionStorage.removeItem('admin_dash_pw');
           return;
         }
-
-        // Clean up test auth message
-        try {
-          await fetch(SUPABASE_URL + '/rest/v1/chat_messages?user_email=eq.test@test.com&message=eq.__auth_test__', {
-            method: 'DELETE',
-            headers: { 'apikey': SUPABASE_KEY }
-          });
-        } catch(e){}
 
         adminPassword = pass;
         sessionStorage.setItem('admin_dash_pw', pass);
@@ -858,12 +842,8 @@
         mainApp.style.display = 'flex';
         initChatPortal();
       } catch (err) {
-        // Fallback grant if network/RPC variation
-        adminPassword = pass;
-        sessionStorage.setItem('admin_dash_pw', pass);
-        pwScreen.style.display = 'none';
-        mainApp.style.display = 'flex';
-        initChatPortal();
+        pwError.textContent = '❌ Server se connect nahi ho paya, internet check karo!';
+        pwBtn.disabled = false;
       }
     }
 
@@ -1296,7 +1276,7 @@
     }
 
     async function setNextPlanInDb(email, planString) {
-      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '9001113382';
+      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '';
       try {
         await fetch(SUPABASE_URL + '/rest/v1/rpc/admin_set_user_plan', {
           method: 'POST',
@@ -1314,7 +1294,7 @@
     }
 
     async function sendAdminRawMessage(msgText) {
-      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '9001113382';
+      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '';
       let sentSuccess = false;
 
       try {
@@ -1377,7 +1357,7 @@
       const creditsToAdd = parseInt(document.getElementById('modalAssignCredits').value, 10) || 0;
       const daysToAdd = parseInt(document.getElementById('modalAssignDays').value, 10) || 30;
       const sendMsg = document.getElementById('modalAssignSendChatMsg').checked;
-      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '9001113382';
+      const pw = adminPassword || sessionStorage.getItem('admin_dash_pw') || '';
 
       btn.disabled = true;
       btn.textContent = '⏳ Activating in Database...';
