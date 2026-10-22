@@ -9,309 +9,379 @@
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
     :root {
-      --flat-bg: #0f172a;
-      --flat-card: #1e293b;
-      --flat-card-hover: #243248;
-      --flat-border: #334155;
-      --flat-border-light: #475569;
+      --bg-dark: #0a0e1a;
+      --bg-card: #111827;
+      --bg-card-header: #151f32;
+      --bg-card-hover: #1e293b;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-subtle-hover: rgba(255, 255, 255, 0.16);
+      
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --text-sub: #64748b;
+      --text-dim: #64748b;
       
-      --flat-blue: #3b82f6;
-      --flat-blue-hover: #2563eb;
-      --flat-green: #10b981;
-      --flat-green-hover: #059669;
-      --flat-yellow: #f59e0b;
-      --flat-yellow-hover: #d97706;
-      --flat-red: #ef4444;
-      --flat-red-hover: #dc2626;
-      --flat-purple: #8b5cf6;
-      --flat-purple-hover: #7c3aed;
-      --flat-cyan: #06b6d4;
-      --flat-cyan-hover: #0891b2;
+      --blue: #3b82f6;
+      --blue-glow: rgba(59, 130, 246, 0.25);
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.25);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.25);
+      --red: #ef4444;
+      --red-glow: rgba(239, 68, 68, 0.25);
+      --purple: #8b5cf6;
+      --purple-glow: rgba(139, 92, 246, 0.25);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--flat-bg);
+      background: var(--bg-dark);
       color: var(--text-main);
       min-height: 100vh;
       overflow-x: hidden;
+      position: relative;
     }
 
-    /* Header */
+    /* Ambient Background Glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; height: 320px;
+      background: radial-gradient(ellipse at 50% -20%, rgba(59, 130, 246, 0.12), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ==================== HEADER ==================== */
     .dash-header {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 16px 28px;
-      background: var(--flat-card);
-      border-bottom: 2px solid var(--flat-border);
+      padding: 16px 32px;
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
       position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
-    .dash-header-left { display: flex; align-items: center; gap: 12px; }
-    .dash-logo { font-size: 28px; line-height: 1; }
+    .dash-header-left { display: flex; align-items: center; gap: 14px; }
+    .dash-logo-badge {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+    }
     .dash-title {
       font-family: 'Outfit', sans-serif;
       font-size: 20px; font-weight: 800;
-      color: var(--text-main);
-      letter-spacing: -0.5px;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dash-title-badge {
+      font-size: 10px; font-weight: 800;
+      padding: 2px 8px; border-radius: 20px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      letter-spacing: 0.5px;
     }
     .dash-subtitle {
       font-size: 11px; color: var(--text-muted); font-weight: 600;
-      letter-spacing: 0.5px; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-top: 2px;
     }
-    .dash-actions { display: flex; gap: 8px; }
+    .dash-actions { display: flex; gap: 10px; align-items: center; }
     .dash-btn {
-      padding: 9px 16px; border-radius: 6px; font-size: 12px;
+      padding: 9px 18px; border-radius: 8px; font-size: 12px;
       font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif;
-      transition: background 0.15s ease, border-color 0.15s ease; border: none;
-      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.2s ease; border: none;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
     }
     .dash-btn-refresh {
-      background: var(--flat-green);
+      background: linear-gradient(135deg, #10b981, #059669);
       color: #ffffff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
     .dash-btn-refresh:hover {
-      background: var(--flat-green-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
     }
     .dash-btn-chat {
-      background: var(--flat-blue);
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: #ffffff;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
     }
     .dash-btn-chat:hover {
-      background: var(--flat-blue-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
     }
 
-    /* Main Content */
+    /* ==================== MAIN CONTENT ==================== */
     .dash-content {
-      padding: 24px 28px; max-width: 1440px; margin: 0 auto;
+      padding: 28px 32px; max-width: 1440px; margin: 0 auto;
+      position: relative; z-index: 1;
     }
 
-    /* Stats Cards Row */
+    /* ==================== STATS ROW ==================== */
     .stats-row {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
       margin-bottom: 24px;
     }
     .stat-card {
-      background: var(--flat-card);
-      border: 1px solid var(--flat-border);
-      border-radius: 8px; padding: 20px;
-      position: relative;
-      border-left: 4px solid var(--flat-blue);
-      transition: background 0.15s ease, border-color 0.15s ease;
+      background: linear-gradient(145deg, rgba(22, 32, 50, 0.75), rgba(17, 24, 39, 0.85));
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px; padding: 22px 24px;
+      position: relative; overflow: hidden;
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
     .stat-card:hover {
-      background: var(--flat-card-hover);
-      border-color: var(--flat-border-light);
+      transform: translateY(-3px);
+      border-color: var(--border-subtle-hover);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
     }
-    .stat-card-glow { display: none; }
-    .stat-card-icon {
-      font-size: 28px; margin-bottom: 8px;
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
     }
+    .stat-card:nth-child(1)::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .stat-card:nth-child(1) .stat-card-value { color: #60a5fa; }
+    .stat-card:nth-child(2)::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .stat-card:nth-child(2) .stat-card-value { color: #34d399; }
+    .stat-card:nth-child(3)::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .stat-card:nth-child(3) .stat-card-value { color: #fbbf24; }
+    .stat-card:nth-child(4)::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .stat-card:nth-child(4) .stat-card-value { color: #f87171; }
+
+    .stat-card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .stat-card-icon-box {
+      width: 44px; height: 44px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .stat-card:nth-child(1) .stat-card-icon-box { background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.25); }
+    .stat-card:nth-child(2) .stat-card-icon-box { background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); }
+    .stat-card:nth-child(3) .stat-card-icon-box { background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25); }
+    .stat-card:nth-child(4) .stat-card-icon-box { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); }
+
     .stat-card-value {
       font-family: 'Outfit', sans-serif;
-      font-size: 28px; font-weight: 800; margin-bottom: 4px;
-      color: var(--text-main);
+      font-size: 32px; font-weight: 800; line-height: 1.1; margin-bottom: 6px;
       letter-spacing: -0.5px;
     }
     .stat-card-label {
       font-size: 11px; color: var(--text-muted); text-transform: uppercase;
-      letter-spacing: 1px; font-weight: 700;
+      letter-spacing: 0.8px; font-weight: 700;
     }
-    .stat-card:nth-child(1) { border-left-color: var(--flat-blue); }
-    .stat-card:nth-child(1) .stat-card-value { color: var(--flat-blue); }
-    .stat-card:nth-child(2) { border-left-color: var(--flat-green); }
-    .stat-card:nth-child(2) .stat-card-value { color: var(--flat-green); }
-    .stat-card:nth-child(3) { border-left-color: var(--flat-yellow); }
-    .stat-card:nth-child(3) .stat-card-value { color: var(--flat-yellow); }
-    .stat-card:nth-child(4) { border-left-color: var(--flat-red); }
-    .stat-card:nth-child(4) .stat-card-value { color: var(--flat-red); }
 
-    /* Two Column Layout */
-    .two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-
-    /* Panel */
+    /* ==================== PANELS & COLLAPSIBLE SYSTEM ==================== */
     .panel {
-      background: var(--flat-card);
-      border: 1px solid var(--flat-border);
-      border-radius: 8px; overflow: hidden;
-      margin-bottom: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px; overflow: hidden;
+      margin-bottom: 22px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      transition: border-color 0.2s ease;
+    }
+    .panel:hover {
+      border-color: var(--border-subtle-hover);
     }
     .panel-header {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 20px;
-      background: #162032;
-      border-bottom: 1px solid var(--flat-border);
+      padding: 16px 22px;
+      background: var(--bg-card-header);
+      border-bottom: 1px solid var(--border-subtle);
     }
     .panel-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 13px; font-weight: 700; color: var(--text-main);
-      letter-spacing: 0.5px; text-transform: uppercase;
+      font-size: 14px; font-weight: 700; color: #ffffff;
+      letter-spacing: 0.3px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel-body { padding: 22px; }
+
+    /* Collapsible Panel Headers */
+    .collapse-header {
+      cursor: pointer; user-select: none;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .collapse-header:hover {
+      background: #19243a !important;
+    }
+    .collapse-toggle-btn {
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 6px; color: #cbd5e1;
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px; font-weight: 700;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .collapse-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+    .collapse-toggle-btn.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.45);
+      color: #60a5fa;
+    }
+
+    /* ==================== SPLIT ALL USERS SYSTEM ==================== */
+    .users-split-container {
+      display: flex; flex-direction: column; gap: 20px;
+      padding: 18px 20px;
+    }
+    .users-split-toolbar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle);
+    }
+    .user-pill-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 6px;
+      font-size: 11.5px; font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+    }
+    .user-pill-tag.tag-active {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+    .user-pill-tag.tag-expired {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+    .user-pill-tag.tag-total {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+    }
+
+    .user-section-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px; overflow: hidden;
+    }
+    .user-section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 18px;
+      background: #141c2c;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .user-section-header.green-accent {
+      border-left: 4px solid var(--green);
+    }
+    .user-section-header.amber-accent {
+      border-left: 4px solid var(--amber);
+    }
+    .user-section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 13.5px; font-weight: 800; color: #ffffff;
       display: flex; align-items: center; gap: 8px;
     }
-    .panel-body { padding: 18px 20px; }
+    .user-section-badge {
+      font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px;
+    }
+    .user-section-badge.green {
+      background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .user-section-badge.amber {
+      background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .user-section-hint {
+      font-size: 11px; color: var(--text-muted);
+    }
 
     /* User Table */
-    .user-table { width: 100%; border-collapse: collapse; }
+    .table-scroll-wrap { overflow-x: auto; }
+    .user-table { width: 100%; border-collapse: collapse; text-align: left; }
     .user-table th {
-      text-align: left;
       font-family: 'Outfit', sans-serif;
-      font-size: 10px; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 1px;
+      font-size: 10.5px; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
       padding: 12px 14px; font-weight: 700;
-      border-bottom: 2px solid var(--flat-border);
-      background: #162032;
+      border-bottom: 1px solid var(--border-subtle);
+      background: #121a29;
     }
     .user-table td {
       padding: 12px 14px; font-size: 12.5px; color: #cbd5e1;
-      border-bottom: 1px solid var(--flat-border);
-      transition: background 0.1s ease;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: background 0.12s ease;
     }
     .user-table tr:hover td {
-      background: var(--flat-card-hover);
+      background: rgba(255, 255, 255, 0.035);
     }
+
+    /* Badges */
     .status-badge {
-      display: inline-block; padding: 4px 10px; border-radius: 4px;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 6px;
       font-family: 'Outfit', sans-serif;
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 0.5px; text-transform: uppercase;
+      font-size: 10.5px; font-weight: 800;
+      letter-spacing: 0.4px; text-transform: uppercase;
     }
     .status-active {
-      background: #064e3b;
-      color: #6ee7b7;
-      border: 1px solid #059669;
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
     }
     .status-expired {
-      background: #7f1d1d;
-      color: #fca5a5;
-      border: 1px solid #dc2626;
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .status-warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .status-off {
+      background: rgba(255, 165, 0, 0.1);
+      color: #ffa500;
+      border: 1px solid rgba(255, 165, 0, 0.3);
     }
 
-    /* Plan Breakdown */
-    .plan-bar-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--flat-border);
-    }
-    .plan-bar-item:last-child { border-bottom: none; }
-    .plan-bar-label { font-size: 13px; font-weight: 600; color: #cbd5e1; min-width: 80px; }
-    .plan-bar-track {
-      flex: 1; height: 8px; background: #0f172a;
-      border-radius: 4px; overflow: hidden;
-      border: 1px solid var(--flat-border);
-    }
-    .plan-bar-fill {
-      height: 100%; border-radius: 4px;
-      background: var(--flat-blue);
-      transition: width 0.4s ease;
-    }
-    .plan-bar-count {
-      font-family: 'Outfit', sans-serif;
-      font-size: 12px; font-weight: 700; color: var(--flat-blue); min-width: 30px; text-align: right;
-    }
-
-    /* Loading */
-    .loading-text {
-      color: var(--text-muted); font-size: 13px; padding: 24px; text-align: center;
-      font-family: 'Outfit', sans-serif;
-      letter-spacing: 0.5px; font-weight: 600;
-    }
-
-    /* Password Screen */
-    .pw-screen {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--flat-bg); display: flex;
-      justify-content: center; align-items: center; z-index: 9999;
-    }
-    .pw-screen.hidden { display: none; }
-    .pw-card {
-      background: var(--flat-card);
-      border: 2px solid var(--flat-border);
-      border-radius: 8px; padding: 36px 32px; width: 380px;
-      text-align: center;
-    }
-    .pw-icon { font-size: 44px; margin-bottom: 12px; }
-    .pw-title {
-      font-family: 'Outfit', sans-serif;
-      font-size: 20px; font-weight: 800; margin-bottom: 6px;
-      color: var(--text-main);
-      letter-spacing: -0.5px;
-    }
-    .pw-sub {
-      font-size: 12px; color: var(--text-muted); margin-bottom: 20px;
-    }
-    .pw-input {
-      width: 100%; padding: 12px 16px;
-      background: #0f172a;
-      border: 1.5px solid var(--flat-border);
-      border-radius: 6px; color: var(--text-main); font-size: 15px;
-      font-family: 'Outfit', sans-serif;
-      outline: none; text-align: center; letter-spacing: 4px;
-      transition: border-color 0.15s ease;
-    }
-    .pw-input:focus {
-      border-color: var(--flat-blue);
-    }
-    .pw-input::placeholder { color: #475569; letter-spacing: 0; font-size: 13px; font-family: 'Inter', sans-serif; }
-    .pw-btn {
-      width: 100%; padding: 12px; margin-top: 14px;
-      background: var(--flat-blue);
-      border: none;
-      border-radius: 6px; color: #ffffff;
-      font-family: 'Outfit', sans-serif;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      letter-spacing: 0.5px; text-transform: uppercase;
-      transition: background 0.15s ease;
-    }
-    .pw-btn:hover {
-      background: var(--flat-blue-hover);
-    }
-    .pw-error { margin-top: 10px; font-size: 12px; color: var(--flat-red); min-height: 18px; font-weight: 600; }
-
-    /* Banner Manager Styles */
-    .banner-input {
-      width: 100%; padding: 10px 14px;
-      background: #0f172a;
-      border: 1px solid var(--flat-border);
-      border-radius: 6px; color: var(--text-main); font-size: 13px;
+    /* Forms & Inputs */
+    .banner-input, .banner-textarea {
+      width: 100%; padding: 11px 14px;
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px; color: var(--text-main); font-size: 13px;
       font-family: inherit; outline: none;
-      transition: border-color 0.15s ease;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .banner-input:focus {
-      border-color: var(--flat-blue);
+    .banner-input:focus, .banner-textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
     }
-    .banner-input::placeholder { color: #475569; }
-    .banner-textarea {
-      width: 100%; padding: 10px 14px; min-height: 90px; resize: vertical;
-      background: #0f172a;
-      border: 1px solid var(--flat-border);
-      border-radius: 6px; color: var(--text-main); font-size: 13px;
-      font-family: inherit; outline: none; line-height: 1.5;
-      transition: border-color 0.15s ease;
-    }
-    .banner-textarea:focus {
-      border-color: var(--flat-blue);
-    }
-    .banner-textarea::placeholder { color: #475569; }
+    .banner-input::placeholder, .banner-textarea::placeholder { color: #475569; }
+    .banner-textarea { min-height: 90px; resize: vertical; line-height: 1.5; }
     .banner-form-row {
-      display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;
+      display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px;
     }
     .banner-form-label {
       font-family: 'Outfit', sans-serif;
-      font-size: 10px; font-weight: 700; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 1px;
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
     }
     .banner-toggle {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 16px;
-      background: #162032;
-      border: 1px solid var(--flat-border);
-      border-radius: 6px; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px;
+      background: #141d2e;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px; margin-bottom: 16px;
     }
     .toggle-switch {
-      position: relative; width: 44px; height: 24px; cursor: pointer;
+      position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0;
     }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
     .toggle-slider {
@@ -325,289 +395,180 @@
       border-radius: 50%; transition: 0.2s ease;
     }
     .toggle-switch input:checked + .toggle-slider {
-      background: var(--flat-green);
+      background: var(--green);
     }
     .toggle-switch input:checked + .toggle-slider:before {
       transform: translateX(20px);
       background: #ffffff;
     }
+
     .banner-preview {
-      background: #162032;
-      border: 1px solid var(--flat-border);
-      border-radius: 6px; padding: 16px;
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px; padding: 18px;
       margin-top: 14px; display: none;
     }
     .banner-preview-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 14px; font-weight: 700; margin-bottom: 6px;
-      color: var(--flat-blue);
+      font-size: 15px; font-weight: 800; margin-bottom: 6px;
+      color: #60a5fa;
     }
     .banner-preview-msg {
       font-size: 12.5px; color: #cbd5e1; line-height: 1.6; white-space: pre-line;
     }
     .banner-preview-btn {
-      display: inline-block; margin-top: 10px; padding: 8px 16px;
-      background: var(--flat-blue);
-      border: none;
-      border-radius: 4px; color: #ffffff;
-      font-size: 11.5px; font-weight: 700;
+      display: inline-block; margin-top: 12px; padding: 8px 18px;
+      background: var(--blue);
+      border: none; border-radius: 6px; color: #ffffff;
+      font-size: 12px; font-weight: 700;
     }
     .banner-actions {
-      display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;
+      display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;
     }
     .banner-save-btn {
-      padding: 10px 20px;
-      background: var(--flat-green);
-      border: none;
-      border-radius: 6px; color: #ffffff; font-size: 12px;
-      font-weight: 700; cursor: pointer;
+      padding: 11px 22px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none; border-radius: 8px; color: #ffffff; font-size: 12px;
+      font-weight: 800; cursor: pointer;
       font-family: 'Outfit', sans-serif;
       letter-spacing: 0.5px; text-transform: uppercase;
-      transition: background 0.15s ease;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s ease;
     }
     .banner-save-btn:hover {
-      background: var(--flat-green-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
     }
     .banner-save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .banner-preset-btn {
-      padding: 8px 12px;
-      background: #162032;
-      border: 1px solid var(--flat-border);
-      border-radius: 6px;
-      color: #cbd5e1; font-size: 11px; font-weight: 600;
-      cursor: pointer; font-family: inherit; transition: background 0.15s ease;
+      padding: 9px 14px;
+      background: #141d2e;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      color: #cbd5e1; font-size: 11.5px; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: all 0.15s ease;
     }
     .banner-preset-btn:hover {
-      background: var(--flat-card-hover);
-      border-color: var(--flat-border-light);
+      background: var(--bg-card-hover);
+      border-color: var(--border-subtle-hover);
+      color: #ffffff;
     }
     .banner-status {
-      font-size: 12px; margin-top: 8px; min-height: 18px;
+      font-size: 12px; margin-top: 10px; min-height: 20px;
       font-weight: 600;
     }
 
-    /* Quick Presets */
+    /* Presets Grid */
     .presets-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
       margin-top: 10px;
     }
     .preset-card {
-      background: #162032;
-      border: 1px solid var(--flat-border);
-      border-radius: 6px; padding: 10px 12px;
-      cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease;
+      background: #141d2e;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px; padding: 12px 14px;
+      cursor: pointer; transition: all 0.15s ease;
     }
     .preset-card:hover {
-      background: var(--flat-card-hover);
-      border-color: var(--flat-blue);
+      background: #1a253a;
+      border-color: var(--blue);
+      transform: translateY(-1px);
     }
-    .preset-card-title { font-size: 11.5px; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
-    .preset-card-desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+    .preset-card-title { font-size: 12px; font-weight: 800; color: #ffffff; margin-bottom: 3px; }
+    .preset-card-desc { font-size: 10.5px; color: var(--text-muted); line-height: 1.4; }
+
+    /* Loading text */
+    .loading-text {
+      color: var(--text-muted); font-size: 13px; padding: 28px; text-align: center;
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.5px; font-weight: 600;
+    }
+    .empty-state {
+      padding: 30px; text-align: center; color: var(--text-dim);
+      font-size: 12.5px; font-weight: 600;
+    }
+
+    /* Password Screen */
+    .pw-screen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: #070a12;
+      display: flex; justify-content: center; align-items: center;
+      z-index: 999999;
+      backdrop-filter: blur(10px);
+    }
+    .pw-card {
+      background: linear-gradient(145deg, #131c2e, #0e1524);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 400px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(59, 130, 246, 0.1);
+    }
+    .pw-icon { font-size: 42px; margin-bottom: 12px; }
+    .pw-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px; font-weight: 800; margin-bottom: 6px;
+      color: #ffffff; letter-spacing: -0.3px;
+    }
+    .pw-sub { font-size: 12.5px; color: var(--text-muted); margin-bottom: 22px; }
+    .pw-input {
+      width: 100%; padding: 13px 16px;
+      background: #090d16;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 8px; color: #ffffff; font-size: 16px;
+      font-family: 'Outfit', sans-serif;
+      outline: none; text-align: center; letter-spacing: 3px;
+      transition: all 0.15s ease;
+      margin-bottom: 14px;
+    }
+    .pw-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+    }
+    .pw-btn {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      border: none; border-radius: 8px; color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px; font-weight: 800; cursor: pointer;
+      letter-spacing: 0.5px; text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+      transition: all 0.15s ease;
+    }
+    .pw-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    }
+    .pw-error { margin-top: 12px; font-size: 12px; color: #f87171; min-height: 18px; font-weight: 700; }
 
     /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: var(--flat-bg); }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
     ::-webkit-scrollbar-thumb {
-      background: var(--flat-border);
-      border-radius: 3px;
+      background: #243248; border-radius: 3px;
     }
-    ::-webkit-scrollbar-thumb:hover { background: var(--flat-border-light); }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
-    /* Responsive */
-    @media (max-width: 900px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-      .two-cols { grid-template-columns: 1fr; }
-      .presets-grid { grid-template-columns: 1fr; }
-      .dash-content { padding: 16px 14px; }
-    }
-    @media (max-width: 600px) {
-      .dash-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        padding: 12px 14px;
-      }
-      .dash-header-left {
-        justify-content: flex-start;
-      }
-      .dash-title {
-        font-size: 17px;
-      }
-      .dash-actions {
-        width: 100%;
-        display: flex;
-        gap: 8px;
-      }
-      .dash-btn {
-        flex: 1;
-        justify-content: center;
-        padding: 8px 10px;
-        font-size: 11px;
-      }
-      .stats-row {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 16px;
-      }
-      .stat-card {
-        padding: 12px;
-        border-radius: 6px;
-      }
-      .stat-card-value {
-        font-size: 20px;
-      }
-      .stat-card-icon {
-        font-size: 20px;
-        margin-bottom: 2px;
-      }
-      .stat-card-label {
-        font-size: 9.5px;
-      }
-      .dash-content {
-        padding: 10px;
-      }
-      .panel {
-        border-radius: 6px;
-        margin-bottom: 14px;
-      }
-      .panel-header {
-        padding: 10px 12px;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 8px;
-      }
-      #userSearch {
-        width: 100% !important;
-      }
-      .panel-body {
-        padding: 10px;
-      }
-      .panel-body div[style*="display:flex"][style*="gap:8px"] {
-        flex-direction: column !important;
-        align-items: stretch !important;
-      }
-      .panel-body div[style*="display:flex"][style*="gap:8px"] input,
-      .panel-body div[style*="display:flex"][style*="gap:8px"] button {
-        width: 100% !important;
-      }
-      .user-table th, .user-table td {
-        padding: 8px 10px;
-        font-size: 11.5px;
-        white-space: nowrap;
-      }
-      /* Make all modals mobile-friendly */
-      div[id$="Modal"] {
-        padding: 10px !important;
-      }
-      div[id$="Modal"] > div {
-        max-width: 96vw !important;
-        max-height: 92vh !important;
-        border-radius: 12px !important;
-        display: flex !important;
-        flex-direction: column !important;
-      }
-      div[id$="Modal"] > div > div:last-child {
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-      }
-    }
-    /* ===== USERS TABLE → CARD LAYOUT ON MOBILE ===== */
-    @media (max-width: 760px) {
-      #allUsersTable { overflow-x: visible !important; }
-      .user-table thead { display: none; }
-      .user-table, .user-table tbody, .user-table tr, .user-table td {
-        display: block;
-        width: 100%;
-      }
-      .user-table tr {
-        margin-bottom: 12px;
-        border: 1px solid var(--flat-border);
-        border-radius: 10px;
-        padding: 10px 12px;
-        background: var(--flat-card);
-      }
-      .user-table td {
-        padding: 7px 0 !important;
-        border-bottom: 1px dashed rgba(255,255,255,0.08);
-        white-space: normal !important;
-        font-size: 12.5px !important;
-      }
-      .user-table td:last-child { border-bottom: none; }
-      .user-table td[data-label]:not([data-label=""])::before {
-        content: attr(data-label);
-        display: block;
-        font-size: 9.5px;
-        font-weight: 800;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 5px;
-      }
-      .user-table td[data-label=""] {
-        padding-bottom: 10px !important;
-        margin-bottom: 4px;
-        border-bottom: 1px solid var(--flat-border-light);
-        font-size: 13.5px !important;
-      }
-      .user-table select { min-width: 0 !important; }
-    }
-    .pw-screen {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #0b0f19;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999999;
-    }
-    .pw-screen.hidden {
-      display: none !important;
-    }
-    .pw-card {
-      background: #162032;
-      border: 1px solid #334155;
-      border-radius: 14px;
-      padding: 36px 32px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-    }
-    .pw-icon { font-size: 38px; margin-bottom: 12px; }
-    .pw-title { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
-    .pw-sub { font-size: 13px; color: #94a3b8; margin-bottom: 22px; }
-    .pw-input {
-      width: 100%;
-      padding: 13px 16px;
-      background: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 15px;
-      outline: none;
-      margin-bottom: 16px;
-      text-align: center;
-      letter-spacing: 2px;
-    }
-    .pw-input:focus { border-color: #3b82f6; }
-    .pw-btn {
-      width: 100%;
-      padding: 13px;
-      background: #3b82f6;
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 800;
-      font-family: 'Outfit', sans-serif;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .pw-btn:hover { background: #2563eb; }
-    .pw-error { color: #ef4444; font-size: 12px; font-weight: 700; margin-top: 14px; min-height: 18px; }
+    /* Animations */
     @keyframes modalScaleIn {
       from { transform: scale(0.96); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .two-cols { grid-template-columns: 1fr; }
+      .presets-grid { grid-template-columns: 1fr; }
+      .dash-content { padding: 18px 16px; }
+    }
+    @media (max-width: 600px) {
+      .dash-header { flex-direction: column; align-items: stretch; gap: 12px; padding: 12px 16px; }
+      .dash-actions { width: 100%; }
+      .dash-btn { flex: 1; justify-content: center; }
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 14px; }
+      .stat-card-value { font-size: 22px; }
+      .stat-card-icon-box { width: 34px; height: 34px; font-size: 18px; }
     }
   </style>
 </head>
@@ -616,11 +577,11 @@
   <!-- Password Screen -->
   <div class="pw-screen" id="pwScreen">
     <div class="pw-card">
-      <div class="pw-icon">📊</div>
+      <div class="pw-icon">🔐</div>
       <div class="pw-title">Admin Dashboard</div>
-      <div class="pw-sub">Password daalo to access dashboard</div>
-      <input type="password" class="pw-input" id="pwInput" placeholder="Password..." autofocus onkeydown="if(event.key==='Enter') tryLogin()">
-      <button class="pw-btn" id="pwBtn" onclick="tryLogin()">🔓 Unlock</button>
+      <div class="pw-sub">Data Entry Management Portal & Controls</div>
+      <input type="password" class="pw-input" id="pwInput" placeholder="Enter Admin Password..." autofocus onkeydown="if(event.key==='Enter') tryLogin()">
+      <button class="pw-btn" id="pwBtn" onclick="tryLogin()">🔓 Unlock Dashboard</button>
       <div class="pw-error" id="pwError"></div>
     </div>
   </div>
@@ -629,15 +590,18 @@
   <div id="mainApp" style="display:none;">
     <div class="dash-header">
       <div class="dash-header-left">
-        <div class="dash-logo">📊</div>
+        <div class="dash-logo-badge">📊</div>
         <div>
-          <div class="dash-title">Admin Dashboard</div>
-          <div class="dash-subtitle">DATA ENTRY — Business Overview</div>
+          <div class="dash-title">
+            <span>Admin Dashboard</span>
+            <span class="dash-title-badge">PORTAL v9.2</span>
+          </div>
+          <div class="dash-subtitle">DATA ENTRY — Live Business Overview & User Controls</div>
         </div>
       </div>
       <div class="dash-actions">
-        <a href="admin-chat.html" class="dash-btn dash-btn-chat" title="Open User Support Chat">💬 Chat Panel</a>
-        <button class="dash-btn dash-btn-refresh" id="refreshBtn">🔄 Refresh</button>
+        <a href="admin-chat.html" class="dash-btn dash-btn-chat" title="Open User Support Chat">💬 Support Chat</a>
+        <button class="dash-btn dash-btn-refresh" id="refreshBtn">🔄 Live Refresh</button>
       </div>
     </div>
 
@@ -645,38 +609,54 @@
       <!-- Stats Cards -->
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-card-glow"></div>
-          <div class="stat-card-icon">👥</div>
+          <div class="stat-card-header">
+            <span class="stat-card-label">Total Users</span>
+            <div class="stat-card-icon-box">👥</div>
+          </div>
           <div class="stat-card-value" id="totalUsers">-</div>
-          <div class="stat-card-label">Total Users</div>
+          <div style="font-size:11px;color:var(--text-dim);font-weight:600;">Registered Operators</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-glow"></div>
-          <div class="stat-card-icon">✅</div>
+          <div class="stat-card-header">
+            <span class="stat-card-label">Active Plans</span>
+            <div class="stat-card-icon-box">✅</div>
+          </div>
           <div class="stat-card-value" id="activeUsers">-</div>
-          <div class="stat-card-label">Active Plans</div>
+          <div style="font-size:11px;color:var(--text-dim);font-weight:600;">Active & Working</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-glow"></div>
-          <div class="stat-card-icon">💰</div>
+          <div class="stat-card-header">
+            <span class="stat-card-label">Total Revenue</span>
+            <div class="stat-card-icon-box">💰</div>
+          </div>
           <div class="stat-card-value" id="totalRevenue">-</div>
-          <div class="stat-card-label">Total Revenue</div>
+          <div style="font-size:11px;color:var(--text-dim);font-weight:600;">Collected from plans</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-glow"></div>
-          <div class="stat-card-icon">❌</div>
+          <div class="stat-card-header">
+            <span class="stat-card-label">Expired Plans</span>
+            <div class="stat-card-icon-box">⚠️</div>
+          </div>
           <div class="stat-card-value" id="expiredUsers">-</div>
-          <div class="stat-card-label">Expired Plans</div>
+          <div style="font-size:11px;color:var(--text-dim);font-weight:600;">Need Renewal / Recharge</div>
         </div>
       </div>
 
-      <!-- ==================== 📢 BANNER MANAGER (NEW) ==================== -->
-      <div class="panel" style="border: 1px solid rgba(255,179,71,0.3);">
-        <div class="panel-header" style="background: rgba(255,179,71,0.06);">
-          <div class="panel-title">📢 Banner Manager — Sabhi Users ko Message</div>
-          <span id="bannerLiveStatus" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;"></span>
+      <!-- ==================== 📢 BANNER MANAGER (COLLAPSIBLE - DEFAULT CLOSED) ==================== -->
+      <div class="panel collapse-panel" style="border: 1px solid rgba(245,158,11,0.25);">
+        <div class="panel-header collapse-header" onclick="toggleBannerCollapse(event)" style="background: rgba(245,158,11,0.04);">
+          <div class="panel-title" style="color: #fbbf24;">
+            <span>📢 Banner Manager — Sabhi Users ko Message</span>
+            <span id="bannerLiveStatus" style="font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;"></span>
+          </div>
+          <button type="button" class="collapse-toggle-btn" id="bannerToggleBtn" onclick="toggleBannerCollapse(event)">
+            <span id="bannerArrow">▼</span>
+            <span id="bannerToggleText">Kholein / Open</span>
+          </button>
         </div>
-        <div class="panel-body">
+        
+        <!-- Panel Body: Default collapsed / closed -->
+        <div class="panel-body collapse-body" id="bannerPanelBody" style="display:none;">
 
           <!-- Toggle ON/OFF -->
           <div class="banner-toggle">
@@ -685,33 +665,33 @@
               <span class="toggle-slider"></span>
             </label>
             <div>
-              <div style="font-size:13px;font-weight:700;color:#d0d0ee;">Banner ON/OFF</div>
-              <div style="font-size:10px;color:#8888aa;">Enable karo toh sabhi users ko popup mein dikhega</div>
+              <div style="font-size:13px;font-weight:700;color:#f8fafc;">Banner Switch (ON / OFF)</div>
+              <div style="font-size:11px;color:#94a3b8;">Enable karne par sabhi users ko app popup mein notification dikhega</div>
             </div>
           </div>
 
           <!-- Page Targeting -->
-          <div style="margin-bottom:16px;padding:12px 14px;background:rgba(124,106,255,0.04);border:1px solid rgba(124,106,255,0.12);border-radius:10px;">
-            <div style="font-size:11px;font-weight:700;color:#8888aa;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">📍 Kidhar Dikhana Hai?</div>
-            <div style="display:flex;gap:18px;flex-wrap:wrap;">
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#b0b0cc;cursor:pointer;">
-                <input type="checkbox" id="bannerShowPopup" checked style="accent-color:#7c6aff;width:15px;height:15px;cursor:pointer;">
-                📱 Popup
+          <div style="margin-bottom:16px;padding:14px 16px;background:rgba(59,130,246,0.04);border:1px solid rgba(59,130,246,0.12);border-radius:10px;">
+            <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">📍 Kidhar Dikhana Hai? (Target Pages)</div>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#cbd5e1;cursor:pointer;">
+                <input type="checkbox" id="bannerShowPopup" checked style="accent-color:#3b82f6;width:16px;height:16px;cursor:pointer;">
+                📱 Extension Popup
               </label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#b0b0cc;cursor:pointer;">
-                <input type="checkbox" id="bannerShowDashboard" checked style="accent-color:#7c6aff;width:15px;height:15px;cursor:pointer;">
-                📊 Dashboard
+              <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#cbd5e1;cursor:pointer;">
+                <input type="checkbox" id="bannerShowDashboard" checked style="accent-color:#3b82f6;width:16px;height:16px;cursor:pointer;">
+                📊 Dashboard Page
               </label>
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#b0b0cc;cursor:pointer;">
-                <input type="checkbox" id="bannerShowStandalone" checked style="accent-color:#7c6aff;width:15px;height:15px;cursor:pointer;">
-                📋 Standalone
+              <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#cbd5e1;cursor:pointer;">
+                <input type="checkbox" id="bannerShowStandalone" checked style="accent-color:#3b82f6;width:16px;height:16px;cursor:pointer;">
+                📋 Standalone Mode
               </label>
             </div>
-            <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(124,106,255,0.1);">
-              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#00e094;cursor:pointer;">
-                <input type="checkbox" id="bannerShowRefLink" checked style="accent-color:#00e094;width:15px;height:15px;cursor:pointer;">
-                📖 Referral Rules Link Button
-                <span style="font-size:10px;color:#555570;margin-left:4px;">(green button)</span>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#34d399;cursor:pointer;">
+                <input type="checkbox" id="bannerShowRefLink" checked style="accent-color:#10b981;width:15px;height:15px;cursor:pointer;">
+                📖 Referral Rules Link Button Dikhayein
+                <span style="font-size:10px;color:#64748b;margin-left:4px;">(Direct Referral guide link)</span>
               </label>
             </div>
           </div>
@@ -724,7 +704,7 @@
 
           <!-- Banner Message -->
           <div class="banner-form-row">
-            <label class="banner-form-label">💬 Banner Message (HTML support hai)</label>
+            <label class="banner-form-label">💬 Banner Message (HTML & Emojis Supported)</label>
             <textarea class="banner-textarea" id="bannerMessage" placeholder="✅ Ab koi plan kharidne ki zaroorat NAHI!
 
 📌 Bas ek kaam karo:
@@ -738,11 +718,11 @@
           <!-- Banner Button Text -->
           <div class="banner-form-row">
             <label class="banner-form-label">🔘 Button Text</label>
-            <input type="text" class="banner-input" id="bannerButtonText" placeholder="Samajh Gaya! 🚀" style="max-width:300px;">
+            <input type="text" class="banner-input" id="bannerButtonText" placeholder="Samajh Gaya! 🚀" style="max-width:320px;">
           </div>
 
           <!-- Live Preview -->
-          <div style="font-size:11px;font-weight:700;color:#8888aa;text-transform:uppercase;letter-spacing:1px;margin-top:16px;margin-bottom:8px;">👁️ Live Preview</div>
+          <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;margin-top:18px;margin-bottom:8px;">👁️ Live Preview</div>
           <div class="banner-preview" id="bannerPreview">
             <div class="banner-preview-title" id="previewTitle"></div>
             <div class="banner-preview-msg" id="previewMsg"></div>
@@ -750,7 +730,7 @@
           </div>
 
           <!-- Quick Presets -->
-          <div style="font-size:11px;font-weight:700;color:#8888aa;text-transform:uppercase;letter-spacing:1px;margin-top:20px;margin-bottom:8px;">⚡ Quick Presets — Click to Fill</div>
+          <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;margin-top:20px;margin-bottom:8px;">⚡ Quick Presets — 1-Click Fill</div>
           <div class="presets-grid">
             <div class="preset-card" onclick="fillPreset('free')">
               <div class="preset-card-title">🎉 Software FREE Hai</div>
@@ -773,31 +753,39 @@
           <!-- Save Actions -->
           <div class="banner-actions">
             <button class="banner-save-btn" id="bannerSaveBtn">💾 Save & Publish Banner</button>
-            <button class="banner-preset-btn" id="bannerDisableBtn" style="border-color:rgba(255,77,109,0.3);color:#ff4d6d;">🚫 Banner OFF Karo</button>
+            <button class="banner-preset-btn" id="bannerDisableBtn" style="border-color:rgba(239,68,68,0.3);color:#f87171;">🚫 Banner OFF Karo</button>
           </div>
           <div class="banner-status" id="bannerStatus"></div>
         </div>
       </div>
 
-      <!-- ==================== 👤 PER-USER BANNER MANAGER ==================== -->
-      <div class="panel" style="border: 1px solid rgba(124,106,255,0.3);">
-        <div class="panel-header" style="background: rgba(124,106,255,0.06);">
-          <div class="panel-title">👤 Per-User Banner — Ek User ko Personal Message</div>
-          <span id="userBannerLiveStatus" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;"></span>
+      <!-- ==================== 👤 PER-USER BANNER MANAGER (COLLAPSIBLE - DEFAULT CLOSED) ==================== -->
+      <div class="panel collapse-panel" style="border: 1px solid rgba(139,92,246,0.25);">
+        <div class="panel-header collapse-header" onclick="toggleUserBannerCollapse(event)" style="background: rgba(139,92,246,0.04);">
+          <div class="panel-title" style="color: #c4b5fd;">
+            <span>👤 Per-User Banner — Ek User ko Personal Message</span>
+            <span id="userBannerLiveStatus" style="font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;"></span>
+          </div>
+          <button type="button" class="collapse-toggle-btn" id="userBannerToggleBtn" onclick="toggleUserBannerCollapse(event)">
+            <span id="userBannerArrow">▼</span>
+            <span id="userBannerToggleText">Kholein / Open</span>
+          </button>
         </div>
-        <div class="panel-body">
+
+        <!-- Panel Body: Default collapsed / closed -->
+        <div class="panel-body collapse-body" id="userBannerPanelBody" style="display:none;">
 
           <!-- User Email -->
           <div class="banner-form-row">
-            <label class="banner-form-label">📧 User Email (Table mein 📢 button se bhi fill hota hai)</label>
-            <div style="display:flex;gap:8px;">
+            <label class="banner-form-label">📧 User Email (Users Table mein "📢 Banner Bhejo" se auto-fill hota hai)</label>
+            <div style="display:flex;gap:10px;">
               <input type="email" class="banner-input" id="userBannerEmail" placeholder="user@gmail.com" style="flex:1;">
               <button class="banner-preset-btn" id="userBannerCheckBtn" style="white-space:nowrap;">🔍 Check Status</button>
             </div>
           </div>
 
           <!-- Current Status -->
-          <div id="userBannerCurrentStatus" style="display:none;padding:10px 14px;background:rgba(124,106,255,0.05);border:1px solid rgba(124,106,255,0.15);border-radius:10px;margin-bottom:14px;font-size:12px;color:#b0b0cc;"></div>
+          <div id="userBannerCurrentStatus" style="display:none;padding:12px 16px;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.2);border-radius:10px;margin-bottom:14px;font-size:12.5px;color:#cbd5e1;"></div>
 
           <!-- Banner Title -->
           <div class="banner-form-row">
@@ -814,37 +802,37 @@
           <!-- Button Text -->
           <div class="banner-form-row">
             <label class="banner-form-label">🔘 Button Text</label>
-            <input type="text" class="banner-input" id="userBannerButtonText" placeholder="Samajh Gaya ✅" style="max-width:300px;">
+            <input type="text" class="banner-input" id="userBannerButtonText" placeholder="Samajh Gaya ✅" style="max-width:320px;">
           </div>
 
           <!-- Actions -->
           <div class="banner-actions">
-            <button class="banner-save-btn" id="userBannerSendBtn" style="background:linear-gradient(135deg,#7c6aff,#9d8cff);">📢 Send to User</button>
-            <button class="banner-preset-btn" id="userBannerRemoveBtn" style="border-color:rgba(255,77,109,0.3);color:#ff4d6d;">🚫 Remove Banner</button>
+            <button class="banner-save-btn" id="userBannerSendBtn" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);box-shadow:0 4px 14px rgba(139,92,246,0.35);">📢 Send Personal Banner</button>
+            <button class="banner-preset-btn" id="userBannerRemoveBtn" style="border-color:rgba(239,68,68,0.3);color:#f87171;">🚫 Remove Banner</button>
           </div>
           <div class="banner-status" id="userBannerStatus"></div>
         </div>
       </div>
 
       <!-- ==================== 🎛️ TAB & FEATURE CONTROLS ==================== -->
-      <div class="panel" style="border: 1px solid rgba(0, 240, 255, 0.35); box-shadow: 0 4px 25px rgba(0, 240, 255, 0.05);">
-        <div class="panel-header" style="background: rgba(0, 240, 255, 0.06); display:flex; justify-content:space-between; align-items:center;">
-          <div class="panel-title" style="display:flex; align-items:center; gap:8px;">
-            <span>🎛️ Tab & Feature Controls (Tabs Enable / Disable)</span>
+      <div class="panel" style="border: 1px solid rgba(6, 182, 212, 0.25);">
+        <div class="panel-header" style="background: rgba(6, 182, 212, 0.04); display:flex; justify-content:space-between; align-items:center;">
+          <div class="panel-title" style="color: #67e8f9;">
+            <span>🎛️ Tab & Feature Controls (Global Feature Toggles)</span>
           </div>
-          <span id="tabControlsStatusBadge" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(0,224,148,0.12);color:#00e094;">🟢 ALL ACTIVE</span>
+          <span id="tabControlsStatusBadge" style="font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(16,185,129,0.12);color:#34d399;">🟢 ALL ACTIVE</span>
         </div>
         <div class="panel-body">
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
             
             <!-- ⚡ PRO USER TAB TOGGLE -->
-            <div style="padding:16px;background:rgba(240,160,48,0.06);border:1px solid rgba(240,160,48,0.25);border-radius:12px;">
+            <div style="padding:16px;background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.2);border-radius:12px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:22px;">⚡</span>
+                  <span style="font-size:20px;">⚡</span>
                   <div>
-                    <div style="font-size:14px;font-weight:800;color:#ffb347;">PRO USER Tab & Mode</div>
-                    <div style="font-size:11px;color:#8888aa;">Popup mein ⚡ PRO USER button aur Pro Dashboard</div>
+                    <div style="font-size:13.5px;font-weight:800;color:#fbbf24;">PRO USER Tab & Mode</div>
+                    <div style="font-size:11px;color:#94a3b8;">Popup mein ⚡ PRO USER button aur Pro Dashboard</div>
                   </div>
                 </div>
                 <label class="toggle-switch">
@@ -852,17 +840,17 @@
                   <span class="toggle-slider"></span>
                 </label>
               </div>
-              <div id="proUserTabStatusText" style="font-size:11px;font-weight:700;color:#00e094;margin-top:6px;">✅ Status: ENABLED (Users can access Pro User tab)</div>
+              <div id="proUserTabStatusText" style="font-size:11px;font-weight:700;color:#34d399;margin-top:6px;">✅ Status: ENABLED</div>
             </div>
 
             <!-- 🖥️ IHMS WORKER TABS TOGGLE -->
-            <div style="padding:16px;background:rgba(0,240,255,0.06);border:1px solid rgba(0,240,255,0.25);border-radius:12px;">
+            <div style="padding:16px;background:rgba(6,182,212,0.04);border:1px solid rgba(6,182,212,0.2);border-radius:12px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:22px;">🖥️</span>
+                  <span style="font-size:20px;">🖥️</span>
                   <div>
-                    <div style="font-size:14px;font-weight:800;color:#00f0ff;">IHMS Worker Tabs Mode</div>
-                    <div style="font-size:11px;color:#8888aa;">Live IHMS Tabs / Multi-Tab Worker Entry Engine</div>
+                    <div style="font-size:13.5px;font-weight:800;color:#67e8f9;">IHMS Worker Tabs Mode</div>
+                    <div style="font-size:11px;color:#94a3b8;">Multi-Tab Live Worker Entry Engine</div>
                   </div>
                 </div>
                 <label class="toggle-switch">
@@ -870,17 +858,17 @@
                   <span class="toggle-slider"></span>
                 </label>
               </div>
-              <div id="ihmsTabsStatusText" style="font-size:11px;font-weight:700;color:#00e094;margin-top:6px;">✅ Status: ENABLED (Worker Tabs Active)</div>
+              <div id="ihmsTabsStatusText" style="font-size:11px;font-weight:700;color:#34d399;margin-top:6px;">✅ Status: ENABLED</div>
             </div>
 
             <!-- 📋 HID LIST & FILE UPLOAD TOGGLE -->
-            <div style="padding:16px;background:rgba(124,106,255,0.06);border:1px solid rgba(124,106,255,0.25);border-radius:12px;">
+            <div style="padding:16px;background:rgba(139,92,246,0.04);border:1px solid rgba(139,92,246,0.2);border-radius:12px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:22px;">📋</span>
+                  <span style="font-size:20px;">📋</span>
                   <div>
-                    <div style="font-size:14px;font-weight:800;color:#9d8cff;">HID List & Upload Mode</div>
-                    <div style="font-size:11px;color:#8888aa;">Sale Report, Patient DB & Entry Queue Uploads</div>
+                    <div style="font-size:13.5px;font-weight:800;color:#c4b5fd;">HID List & Upload Mode</div>
+                    <div style="font-size:11px;color:#94a3b8;">Sale Report, Patient DB & Queue Uploads</div>
                   </div>
                 </div>
                 <label class="toggle-switch">
@@ -888,78 +876,60 @@
                   <span class="toggle-slider"></span>
                 </label>
               </div>
-              <div id="hidUploadStatusText" style="font-size:11px;font-weight:700;color:#00e094;margin-top:6px;">✅ Status: ENABLED (HID List & Uploads Visible)</div>
+              <div id="hidUploadStatusText" style="font-size:11px;font-weight:700;color:#34d399;margin-top:6px;">✅ Status: ENABLED</div>
             </div>
 
           </div>
 
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.08);">
-            <div id="tabSettingsSaveStatus" style="font-size:12px;color:#8888aa;"></div>
-            <button id="btnSaveTabSettings" style="padding:10px 22px;background:linear-gradient(135deg,#00f0ff,#00e094);color:#07070e;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 4px 15px rgba(0,240,255,0.3);transition:all 0.2s;">💾 Save Tab Settings</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:14px; border-top:1px solid var(--border-subtle);">
+            <div id="tabSettingsSaveStatus" style="font-size:12px;color:#94a3b8;"></div>
+            <button id="btnSaveTabSettings" style="padding:10px 22px;background:linear-gradient(135deg,#06b6d4,#10b981);color:#08101a;border:none;border-radius:8px;font-size:12.5px;font-weight:800;cursor:pointer;box-shadow:0 4px 15px rgba(6,182,212,0.3);transition:all 0.2s;">💾 Save Tab Settings</button>
           </div>
         </div>
       </div>
 
-      <!-- Two Column Layout -->
-      <div class="two-cols">
-        <!-- Plan Breakdown -->
-        <div class="panel" style="margin-bottom:0;">
-          <div class="panel-header">
-            <div class="panel-title">📦 Plan Breakdown</div>
-          </div>
-          <div class="panel-body" id="planBreakdown">
-            <div class="loading-text">Loading...</div>
-          </div>
-        </div>
-
-        <!-- Recent Users -->
-        <div class="panel" style="margin-bottom:0;">
-          <div class="panel-header">
-            <div class="panel-title">🆕 Recent Users</div>
-          </div>
-          <div class="panel-body" id="recentUsers" style="padding:0;">
-            <div class="loading-text">Loading...</div>
-          </div>
-        </div>
-      </div>
 
       <!-- Bulk Actions Panel -->
-      <div class="panel" style="border: 1px solid rgba(0,224,148,0.2);">
-        <div class="panel-header">
-          <div class="panel-title">🚀 Bulk Actions</div>
+      <div class="panel" style="border: 1px solid rgba(16,185,129,0.25);">
+        <div class="panel-header" style="background:rgba(16,185,129,0.04);">
+          <div class="panel-title" style="color:#34d399;">
+            <span>🚀 Bulk Actions & Quick Operations</span>
+          </div>
         </div>
-        <div class="panel-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div class="panel-body" style="display:flex;flex-direction:column;gap:14px;">
           <!-- Bulk Credits -->
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:12px;color:#8888aa;">💰 Sabko credits do:</span>
-            <input type="number" id="bulkCredits" placeholder="500" min="1" style="width:80px;padding:8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#00e094;font-size:13px;font-weight:700;outline:none;">
-            <input type="text" id="bulkMessage" placeholder="🎊 15 Aug pe extra 500 credits FREE!" style="flex:1;min-width:200px;padding:8px 12px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#eaeaf5;font-size:12px;outline:none;">
-            <button id="bulkGiveBtn" style="padding:8px 16px;background:linear-gradient(135deg,#00e094,#00b377);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">🎁 Sabko Do</button>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:12.5px;color:#94a3b8;font-weight:600;">💰 Sabko credits do:</span>
+            <input type="number" id="bulkCredits" placeholder="500" min="1" style="width:90px;padding:9px 12px;background:#090d16;border:1px solid var(--border-subtle);border-radius:8px;color:#34d399;font-size:13px;font-weight:700;outline:none;">
+            <input type="text" id="bulkMessage" placeholder="🎊 15 Aug pe extra 500 credits FREE!" style="flex:1;min-width:220px;padding:9px 14px;background:#090d16;border:1px solid var(--border-subtle);border-radius:8px;color:#f8fafc;font-size:12.5px;outline:none;">
+            <button id="bulkGiveBtn" style="padding:9px 18px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(16,185,129,0.3);">🎁 Sabko Do</button>
           </div>
           <!-- Single User Credits -->
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:12px;color:#8888aa;">👤 Ek user ko:</span>
-            <input type="email" id="singleEmail" placeholder="user@gmail.com" style="width:200px;padding:8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#eaeaf5;font-size:12px;outline:none;">
-            <input type="number" id="singleCredits" placeholder="500" min="1" style="width:80px;padding:8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#00e094;font-size:13px;font-weight:700;outline:none;">
-            <button id="singleGiveBtn" style="padding:8px 16px;background:linear-gradient(135deg,#7c6aff,#a395ff);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">💰 Credits Do</button>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:12.5px;color:#94a3b8;font-weight:600;">👤 Ek user ko:</span>
+            <input type="email" id="singleEmail" placeholder="user@gmail.com" style="width:220px;padding:9px 14px;background:#090d16;border:1px solid var(--border-subtle);border-radius:8px;color:#f8fafc;font-size:12.5px;outline:none;">
+            <input type="number" id="singleCredits" placeholder="500" min="1" style="width:90px;padding:9px 12px;background:#090d16;border:1px solid var(--border-subtle);border-radius:8px;color:#34d399;font-size:13px;font-weight:700;outline:none;">
+            <button id="singleGiveBtn" style="padding:9px 18px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(59,130,246,0.3);">💰 Credits Do</button>
           </div>
           <!-- Add New User -->
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);">
-            <span style="font-size:12px;color:#8888aa;">➕ Naya user add karo:</span>
-            <input type="email" id="newUserEmail" placeholder="newuser@gmail.com" style="width:220px;padding:8px;background:#0a0a1a;border:1px solid rgba(0,224,148,0.2);border-radius:8px;color:#eaeaf5;font-size:12px;outline:none;">
-            <button id="addNewUserBtn" style="padding:8px 16px;background:linear-gradient(135deg,#00e094,#00b377);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">➕ Add (1000 Cr / 10 Din, Renewal ₹299→8000 Cr)</button>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--border-subtle);">
+            <span style="font-size:12.5px;color:#94a3b8;font-weight:600;">➕ Naya user add karo:</span>
+            <input type="email" id="newUserEmail" placeholder="newuser@gmail.com" style="width:240px;padding:9px 14px;background:#090d16;border:1px solid rgba(16,185,129,0.3);border-radius:8px;color:#f8fafc;font-size:12.5px;outline:none;">
+            <button id="addNewUserBtn" style="padding:9px 20px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(16,185,129,0.3);">➕ Add User (1000 Cr / 10 Din, Renewal ₹299→8000 Cr)</button>
           </div>
         </div>
       </div>
 
-      <!-- All Users Table -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">👥 All Users</div>
-          <input type="text" id="userSearch" placeholder="🔍 Search email..." style="padding:8px 14px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.2);border-radius:8px;color:#eaeaf5;font-size:11px;font-family:inherit;outline:none;width:220px;">
+      <!-- ==================== 👥 ALL USERS (SPLIT: ACTIVE ON TOP, EXPIRED/EXPIRING BELOW) ==================== -->
+      <div class="panel" style="border: 1px solid rgba(59,130,246,0.3);">
+        <div class="panel-header" style="background: rgba(59,130,246,0.04);">
+          <div class="panel-title" style="color:#60a5fa;">
+            <span>👥 All Users & Plan Status</span>
+          </div>
+          <input type="text" id="userSearch" placeholder="🔍 Search email, operator, store..." style="padding:9px 16px;background:#090d16;border:1px solid rgba(59,130,246,0.3);border-radius:8px;color:#f8fafc;font-size:12px;font-family:inherit;outline:none;width:260px;transition:border-color 0.15s;">
         </div>
-        <div class="panel-body" id="allUsersTable" style="padding:0;overflow-x:auto;">
-          <div class="loading-text">Loading...</div>
+        <div class="panel-body" id="allUsersTable" style="padding:0;">
+          <div class="loading-text">Loading users...</div>
         </div>
       </div>
     </div>
@@ -1432,6 +1402,55 @@
     let adminPassword = '';
     let allUsers = [];
 
+    // ==================== COLLAPSIBLE PANELS (EXPAND / COLLAPSE) ====================
+    function toggleBannerCollapse(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const body = document.getElementById('bannerPanelBody');
+      const arrow = document.getElementById('bannerArrow');
+      const text = document.getElementById('bannerToggleText');
+      const btn = document.getElementById('bannerToggleBtn');
+      if (!body) return;
+      const isHidden = (body.style.display === 'none' || body.style.display === '');
+      if (isHidden) {
+        body.style.display = 'block';
+        if (arrow) arrow.textContent = '▲';
+        if (text) text.textContent = 'Band Karein / Close';
+        if (btn) btn.classList.add('active');
+      } else {
+        body.style.display = 'none';
+        if (arrow) arrow.textContent = '▼';
+        if (text) text.textContent = 'Kholein / Open';
+        if (btn) btn.classList.remove('active');
+      }
+    }
+
+    function toggleUserBannerCollapse(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const body = document.getElementById('userBannerPanelBody');
+      const arrow = document.getElementById('userBannerArrow');
+      const text = document.getElementById('userBannerToggleText');
+      const btn = document.getElementById('userBannerToggleBtn');
+      if (!body) return;
+      const isHidden = (body.style.display === 'none' || body.style.display === '');
+      if (isHidden) {
+        body.style.display = 'block';
+        if (arrow) arrow.textContent = '▲';
+        if (text) text.textContent = 'Band Karein / Close';
+        if (btn) btn.classList.add('active');
+      } else {
+        body.style.display = 'none';
+        if (arrow) arrow.textContent = '▼';
+        if (text) text.textContent = 'Kholein / Open';
+        if (btn) btn.classList.remove('active');
+      }
+    }
+
     // ==================== BANNER PRESETS ====================
     const BANNER_PRESETS = {
       free: {
@@ -1852,9 +1871,15 @@
     }
 
     function fillUserBannerEmail(email) {
-      document.getElementById('userBannerEmail').value = email;
+      const emailInp = document.getElementById('userBannerEmail');
+      if (emailInp) emailInp.value = email;
+      // Auto open if collapsed
+      const body = document.getElementById('userBannerPanelBody');
+      if (body && (body.style.display === 'none' || body.style.display === '')) {
+        toggleUserBannerCollapse();
+      }
       loadUserBannerStatus();
-      document.getElementById('userBannerEmail').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (emailInp) emailInp.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     // ==================== AUTH & INIT ====================
@@ -2023,50 +2048,151 @@
         document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toLocaleString();
         document.getElementById('expiredUsers').textContent = expiredCount;
 
-        renderPlanBreakdown(planCounts, totalUsers);
-        renderRecentUsers();
         renderAllUsers();
       } catch(e) {
         console.error('loadDashboard error:', e);
       }
     }
 
-    function renderPlanBreakdown(planCounts, total) {
-      const container = document.getElementById('planBreakdown');
-      const sorted = Object.entries(planCounts).sort((a, b) => b[1] - a[1]);
-      if (sorted.length === 0) { container.innerHTML = '<div class="loading-text">Koi plan nahi</div>'; return; }
-      container.innerHTML = '';
-      sorted.forEach(([plan, count]) => {
-        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-        const div = document.createElement('div');
-        div.className = 'plan-bar-item';
-        div.innerHTML = '<div class="plan-bar-label">' + escapeHtml(plan) + '</div>' +
-          '<div class="plan-bar-track"><div class="plan-bar-fill" style="width:' + pct + '%"></div></div>' +
-          '<div class="plan-bar-count">' + count + '</div>';
-        container.appendChild(div);
-      });
+    // ===== BUILD INDIVIDUAL USER ROW HTML =====
+    function buildUserRowHtml(u, isExpiredSection = false) {
+      const now = new Date();
+      const expiry = u.expiry_date ? new Date(u.expiry_date) : null;
+      const isActive = (u.credits || 0) > 0 && (!expiry || expiry >= now);
+      const expiryStr = expiry ? expiry.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+      const isDisabled = u.is_disabled === true;
+
+      // Status Badge Logic
+      let statusBadge = '';
+      if (isDisabled) {
+        statusBadge = '<span class="status-badge status-off">🔧 Off</span>';
+      } else if (isExpiredSection) {
+        if (u._badgeType === 'expiring_soon') {
+          const daysLeft = expiry ? Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+          if ((u.credits || 0) <= 500 && daysLeft <= 3 && daysLeft >= 0) {
+            statusBadge = `<span class="status-badge status-warning" title="${daysLeft} din aur kam credits hain">⏳ Exp in ${daysLeft}d (${u.credits} Cr)</span>`;
+          } else if ((u.credits || 0) <= 500) {
+            statusBadge = `<span class="status-badge status-warning" title="Kam credits bache hain">⚠️ Low Cr (${u.credits})</span>`;
+          } else {
+            statusBadge = `<span class="status-badge status-warning" title="${daysLeft} din mein plan expire hoga">⏳ Exp in ${daysLeft}d</span>`;
+          }
+        } else if (u._badgeType === 'credits_empty') {
+          statusBadge = '<span class="status-badge status-expired">❌ 0 Credits</span>';
+        } else if (u._badgeType === 'date_expired') {
+          statusBadge = '<span class="status-badge status-expired">🔴 Date Expired</span>';
+        } else {
+          statusBadge = '<span class="status-badge status-expired">Expired</span>';
+        }
+      } else {
+        statusBadge = '<span class="status-badge status-active">🟢 Active</span>';
+      }
+
+      // IHMS Lock details
+      let ihmsInfoHtml = '';
+      if (u.locked_hospital_name || u.ihms_username || u.locked_store_id) {
+        const opName = u.ihms_username || 'No Operator';
+        const storeName = u.locked_hospital_name || ('Store ' + (u.locked_store_id || ''));
+        ihmsInfoHtml = `<div style="font-size:10.5px;color:#94a3b8;margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:1px 6px;border-radius:4px;">🏥 ${escapeHtml(storeName)}</span>
+          <span style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);color:#67e8f9;padding:1px 6px;border-radius:4px;">👤 ${escapeHtml(opName)}</span>
+        </div>`;
+      } else {
+        ihmsInfoHtml = `<div style="font-size:10.5px;color:#f59e0b;margin-top:3px;">⚠️ IHMS Unbound (Click 🏥 IHMS)</div>`;
+      }
+
+      // Referral tracking details
+      let refInfoHtml = '';
+      if (u.referred_by) {
+        const isRewarded = u.referral_reward_given === true;
+        const rewardBadge = isRewarded 
+          ? `<span style="font-size:9.5px;color:#34d399;font-weight:700;">✅ Rewarded</span>`
+          : `<span style="font-size:9.5px;color:#fbbf24;font-weight:700;">⏳ 500 Cr Pending</span>`;
+        refInfoHtml = `<div style="display:flex;flex-direction:column;gap:2px;">
+          <span style="font-size:11px;font-weight:700;color:#c4b5fd;">🎟️ ${escapeHtml(u.referred_by)}</span>
+          ${rewardBadge}
+        </div>`;
+      } else {
+        refInfoHtml = `<span style="color:#64748b;font-size:11px;">Direct (No Code)</span>`;
+      }
+
+      const rowStyle = isDisabled ? ' style="opacity:0.6;background:rgba(239,68,68,0.03);"' : '';
+
+      // Determine Next Plan Price and Credits for display
+      const rawPlan = String(u.next_plan || u.plan || '₹299 Plan (8,000 Credits)');
+      let planPrice = 299;
+      let planCredits = 8000;
+      const pMatch = rawPlan.match(/₹?\s*(\d+)/);
+      if (pMatch) planPrice = parseInt(pMatch[1], 10);
+      const cMatch = rawPlan.match(/(\d[\d,]*)\s*(?:credits|cr)/i) || rawPlan.match(/\(([\d,]+)\s*credits\)/i);
+      if (cMatch) {
+        planCredits = parseInt(cMatch[1].replace(/,/g, ''), 10);
+      } else {
+        if (planPrice === 99) planCredits = 5000;
+        else if (planPrice === 199) planCredits = 8000;
+        else if (planPrice === 249) planCredits = 10000;
+        else if (planPrice === 299) planCredits = 8000;
+        else if (planPrice === 399) planCredits = 12000;
+        else if (planPrice === 499) planCredits = 15000;
+      }
+
+      const safePlanStr = escapeHtml(rawPlan).replace(/'/g, "\\'");
+      const safeEmailStr = escapeHtml(u.email).replace(/'/g, "\\'");
+      const planButtonHtml = `
+        <button onclick="openPlanSelectorModal('${safeEmailStr}', '${safePlanStr}')" style="padding:6px 12px;background:linear-gradient(135deg,rgba(16,185,129,0.12),rgba(59,130,246,0.12));border:1px solid rgba(16,185,129,0.4);border-radius:8px;color:#34d399;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;" onmouseover="this.style.borderColor='#10b981';this.style.background='rgba(16,185,129,0.2)'" onmouseout="this.style.borderColor='rgba(16,185,129,0.4)';this.style.background='linear-gradient(135deg,rgba(16,185,129,0.12),rgba(59,130,246,0.12))'" title="Click karke Next Plan Price & Credits change karein">
+          <span>💎 ₹${planPrice} (${planCredits.toLocaleString()} Cr)</span>
+          <span style="font-size:11px;color:#06b6d4;">✏️</span>
+        </button>
+      `;
+
+      const isPro = u.pro_user_enabled !== false;
+      const isTabs = u.ihms_tabs_enabled !== false;
+      const isHid = u.hid_upload_enabled !== false;
+      const isSpeedBoost = u.speed_boost_enabled === true;
+
+      return '<tr' + rowStyle + '><td data-label=""><strong>' + escapeHtml(u.email) + '</strong>' + ihmsInfoHtml + '</td>' +
+        '<td data-label="🎟️ Referral">' + refInfoHtml + '</td>' +
+        '<td data-label="🎯 Next Plan">' + planButtonHtml + '</td>' +
+        '<td data-label="💰 Credits" style="cursor:pointer;" onclick="openCreditEditModal(\'' + safeEmailStr + '\', ' + (u.credits || 0) + ')" title="Click karke Current Balance Set / Add karein"><strong style="color:#34d399;font-size:13px;">' + (u.credits || 0).toLocaleString() + '</strong> <span style="font-size:11px;color:#06b6d4;margin-left:4px;cursor:pointer;">✏️</span></td>' +
+        '<td data-label="📅 Expiry" style="cursor:pointer;" onclick="openExpiryEditModal(\'' + safeEmailStr + '\', \'' + (u.expiry_date || '') + '\')" title="Click karke Expiry Date Set / Change karein"><span style="color:#fbbf24;font-weight:700;font-size:12px;">' + expiryStr + '</span> <span style="font-size:11px;color:#06b6d4;margin-left:4px;cursor:pointer;">✏️</span></td>' +
+        '<td data-label="📶 Status">' + statusBadge + '</td>' +
+        '<td data-label="⚙️ Action" style="white-space:nowrap;">' +
+          '<select onchange="runUserAction(this, \'' + safeEmailStr + '\')" style="width:100%;min-width:180px;padding:7px 8px;background:#090d16;border:1px solid rgba(139,92,246,0.35);border-radius:6px;color:#f8fafc;font-size:11px;font-weight:600;cursor:pointer;outline:none;">' +
+            '<option value="" selected disabled>⚙️ Action Chuno...</option>' +
+            '<option value="ihms">🏥 IHMS Lock Reset</option>' +
+            '<option value="device">💻 Device / Multi-PC Manager</option>' +
+            '<option value="logs">📊 Credit Usage Logs</option>' +
+            '<option value="toggle_user">' + (isDisabled ? '✅ User ko ON karo' : '❌ User ko OFF karo') + '</option>' +
+            '<option value="toggle_pro">' + (isPro ? '⚡ PRO Mode OFF karo' : '⚡ PRO Mode ON karo') + '</option>' +
+            '<option value="toggle_tabs">' + (isTabs ? '🖥️ Worker Tabs OFF karo' : '🖥️ Worker Tabs ON karo') + '</option>' +
+            '<option value="toggle_hid">' + (isHid ? '📋 HID List OFF karo' : '📋 HID List ON karo') + '</option>' +
+            '<option value="toggle_bulk">' + (u.smart_bulk_enabled ? '🎯 Smart Bulk OFF karo' : '🎯 Smart Bulk ON karo') + '</option>' +
+            '<option value="toggle_speedboost">' + (isSpeedBoost ? '🚀 Speed Boost OFF karo' : '🚀 Speed Boost ON karo') + '</option>' +
+            '<option value="hid_cost">⚡ HID Credit Cost Set</option>' +
+            '<option value="speed">⏱️ Speed Settings</option>' +
+            '<option value="grant_bonus">🎁 +10 Din & +1,000 Credits Grant</option>' +
+            '<option value="banner">📢 Banner Bhejo</option>' +
+          '</select>' +
+        '</td></tr>';
     }
 
-    function renderRecentUsers() {
-      const container = document.getElementById('recentUsers');
-      const recent = allUsers.slice(0, 8);
-      if (recent.length === 0) { container.innerHTML = '<div class="loading-text">Koi user nahi</div>'; return; }
-      let html = '<table class="user-table"><thead><tr><th>Email</th><th>Plan</th><th>Date</th></tr></thead><tbody>';
-      recent.forEach(u => {
-        const dateVal = u.created_at || u.updated_at;
-        const joined = dateVal ? new Date(dateVal).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '-';
-        html += '<tr><td>' + escapeHtml(u.email) + '</td>' +
-          '<td>₹' + escapeHtml(u.plan || '0') + '</td>' +
-          '<td>' + joined + '</td></tr>';
+    function buildUserTableHtml(userList, isExpiredSection = false) {
+      if (userList.length === 0) {
+        return `<div class="empty-state">${isExpiredSection ? 'Koi expired ya expiring user nahi mila' : 'Koi active user nahi mila'}</div>`;
+      }
+      let html = '<table class="user-table"><thead><tr><th>User & IHMS Lock</th><th>Referral Info</th><th style="min-width:150px;">🎯 Next Renewal Plan</th><th>Credits</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+      userList.forEach(u => {
+        html += buildUserRowHtml(u, isExpiredSection);
       });
       html += '</tbody></table>';
-      container.innerHTML = html;
+      return html;
     }
 
+    // ===== RENDER ALL USERS (SPLIT: ACTIVE ON TOP, EXPIRED/EXPIRING BELOW) =====
     function renderAllUsers() {
       const container = document.getElementById('allUsersTable');
       const searchVal = (document.getElementById('userSearch').value || '').toLowerCase().trim();
       const now = new Date();
+
       const filtered = allUsers.filter(u => {
         const e = (u.email || '').toLowerCase();
         const op = (u.ihms_username || '').toLowerCase();
@@ -2074,112 +2200,98 @@
         const ref = (u.referred_by || '').toLowerCase();
         return e.includes(searchVal) || op.includes(searchVal) || ddc.includes(searchVal) || ref.includes(searchVal);
       });
-      if (filtered.length === 0) { container.innerHTML = '<div class="loading-text">Koi user nahi mila</div>'; return; }
-      let html = '<table class="user-table"><thead><tr><th>User & IHMS Lock</th><th>Referral Info</th><th style="min-width:150px;">🎯 Next Renewal Plan</th><th>Credits</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="loading-text">Koi user nahi mila</div>';
+        return;
+      }
+
+      const activeUsers = [];
+      const expiredOrExpiringUsers = [];
+
       filtered.forEach(u => {
         const expiry = u.expiry_date ? new Date(u.expiry_date) : null;
-        const isActive = u.credits > 0 && (!expiry || expiry >= now);
-        const expiryStr = expiry ? expiry.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
         const isDisabled = u.is_disabled === true;
+        const hasCredits = (u.credits || 0) > 0;
+        const notExpired = (!expiry || expiry >= now);
+        const isHealthyActive = hasCredits && notExpired && !isDisabled;
 
-        // IHMS Lock details
-        let ihmsInfoHtml = '';
-        if (u.locked_hospital_name || u.ihms_username || u.locked_store_id) {
-          const opName = u.ihms_username || 'No Operator';
-          const storeName = u.locked_hospital_name || ('Store ' + (u.locked_store_id || ''));
-          ihmsInfoHtml = `<div style="font-size:10.5px;color:#a8a8c8;margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span style="background:rgba(0,224,148,0.1);border:1px solid rgba(0,224,148,0.3);color:#00e094;padding:1px 6px;border-radius:4px;">🏥 ${escapeHtml(storeName)}</span>
-            <span style="background:rgba(0,240,255,0.1);border:1px solid rgba(0,240,255,0.3);color:#00f0ff;padding:1px 6px;border-radius:4px;">👤 ${escapeHtml(opName)}</span>
-          </div>`;
+        // Expiring Soon check: currently active, but expiry <= 3 days OR low credits <= 500
+        const isExpiringSoon = isHealthyActive && (
+          (expiry && (expiry.getTime() - now.getTime()) <= 3 * 24 * 60 * 60 * 1000) ||
+          ((u.credits || 0) <= 500)
+        );
+
+        if (isHealthyActive && !isExpiringSoon) {
+          activeUsers.push(u);
         } else {
-          ihmsInfoHtml = `<div style="font-size:10px;color:#f59e0b;margin-top:3px;">⚠️ IHMS Unbound (Click 🏥 IHMS)</div>`;
+          const copy = { ...u };
+          if (isDisabled) {
+            copy._badgeType = 'disabled';
+          } else if (!notExpired) {
+            copy._badgeType = 'date_expired';
+          } else if (!hasCredits) {
+            copy._badgeType = 'credits_empty';
+          } else if (isExpiringSoon) {
+            copy._badgeType = 'expiring_soon';
+          } else {
+            copy._badgeType = 'expired';
+          }
+          expiredOrExpiringUsers.push(copy);
         }
-
-        // Referral tracking details
-        let refInfoHtml = '';
-        if (u.referred_by) {
-          const isRewarded = u.referral_reward_given === true;
-          const rewardBadge = isRewarded 
-            ? `<span style="font-size:9.5px;color:#00e094;font-weight:700;">✅ Rewarded</span>`
-            : `<span style="font-size:9.5px;color:#ffb347;font-weight:700;">⏳ 500 Cr Pending</span>`;
-          refInfoHtml = `<div style="display:flex;flex-direction:column;gap:2px;">
-            <span style="font-size:11px;font-weight:700;color:#9d8cff;">🎟️ ${escapeHtml(u.referred_by)}</span>
-            ${rewardBadge}
-          </div>`;
-        } else {
-          refInfoHtml = `<span style="color:#64748b;font-size:11px;">Direct (No Code)</span>`;
-        }
-
-        const statusBadge = isDisabled
-          ? '<span class="status-badge" style="background:rgba(255,165,0,0.1);color:#ffa500;">🔧 Off</span>'
-          : isActive
-            ? '<span class="status-badge status-active">Active</span>'
-            : '<span class="status-badge status-expired">Expired</span>';
-        const toggleBtnStyle = isDisabled
-          ? 'background:rgba(255,77,109,0.15);border:1px solid rgba(255,77,109,0.3);color:#ff4d6d;'
-          : 'background:rgba(0,224,148,0.1);border:1px solid rgba(0,224,148,0.3);color:#00e094;';
-        const toggleLabel = isDisabled ? '❌ Off' : '✅ On';
-        const rowStyle = isDisabled ? ' style="opacity:0.5;background:rgba(255,77,109,0.03);"' : '';
-        
-        // Determine Next Plan Price and Credits for display
-        const rawPlan = String(u.next_plan || u.plan || '₹299 Plan (8,000 Credits)');
-        let planPrice = 299;
-        let planCredits = 8000;
-        const pMatch = rawPlan.match(/₹?\s*(\d+)/);
-        if (pMatch) planPrice = parseInt(pMatch[1], 10);
-        const cMatch = rawPlan.match(/(\d[\d,]*)\s*(?:credits|cr)/i) || rawPlan.match(/\(([\d,]+)\s*credits\)/i);
-        if (cMatch) {
-          planCredits = parseInt(cMatch[1].replace(/,/g, ''), 10);
-        } else {
-          if (planPrice === 99) planCredits = 5000;
-          else if (planPrice === 199) planCredits = 8000;
-          else if (planPrice === 249) planCredits = 10000;
-          else if (planPrice === 299) planCredits = 8000;
-          else if (planPrice === 399) planCredits = 12000;
-          else if (planPrice === 499) planCredits = 15000;
-        }
-
-        const safePlanStr = escapeHtml(rawPlan).replace(/'/g, "\\'");
-        const safeEmailStr = escapeHtml(u.email).replace(/'/g, "\\'");
-        const planButtonHtml = `
-          <button onclick="openPlanSelectorModal('${safeEmailStr}', '${safePlanStr}')" style="padding:6px 12px;background:linear-gradient(135deg,rgba(0,224,148,0.12),rgba(124,106,255,0.12));border:1px solid rgba(0,224,148,0.45);border-radius:8px;color:#00e094;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:all 0.2s;" onmouseover="this.style.borderColor='#00e094';this.style.background='rgba(0,224,148,0.22)'" onmouseout="this.style.borderColor='rgba(0,224,148,0.45)';this.style.background='linear-gradient(135deg,rgba(0,224,148,0.12),rgba(124,106,255,0.12))'" title="Click karke Next Plan Price & Credits change karein">
-            <span>💎 ₹${planPrice} (${planCredits.toLocaleString()} Cr)</span>
-            <span style="font-size:11px;color:#00f0ff;">✏️</span>
-          </button>
-        `;
-
-        const isPro = u.pro_user_enabled !== false;
-        const isTabs = u.ihms_tabs_enabled !== false;
-        const isHid = u.hid_upload_enabled !== false;
-        const isSpeedBoost = u.speed_boost_enabled === true;
-
-        html += '<tr' + rowStyle + '><td data-label=""><strong>' + escapeHtml(u.email) + '</strong>' + ihmsInfoHtml + '</td>' +
-          '<td data-label="🎟️ Referral">' + refInfoHtml + '</td>' +
-          '<td data-label="🎯 Next Plan">' + planButtonHtml + '</td>' +
-          '<td data-label="💰 Credits" style="cursor:pointer;" onclick="openCreditEditModal(\'' + safeEmailStr + '\', ' + (u.credits || 0) + ')" title="Click karke Current Balance Set / Add karein"><strong style="color:#00e094;font-size:13px;">' + (u.credits || 0).toLocaleString() + '</strong> <span style="font-size:11px;color:#00f0ff;margin-left:4px;cursor:pointer;">✏️</span></td>' +
-          '<td data-label="📅 Expiry" style="cursor:pointer;" onclick="openExpiryEditModal(\'' + safeEmailStr + '\', \'' + (u.expiry_date || '') + '\')" title="Click karke Expiry Date Set / Change karein"><span style="color:#ffd700;font-weight:700;font-size:12px;">' + expiryStr + '</span> <span style="font-size:11px;color:#00f0ff;margin-left:4px;cursor:pointer;">✏️</span></td>' +
-          '<td data-label="📶 Status">' + statusBadge + '</td>' +
-          '<td data-label="⚙️ Action" style="white-space:nowrap;">' +
-            '<select onchange="runUserAction(this, \'' + safeEmailStr + '\')" style="width:100%;min-width:180px;padding:7px 8px;background:#0a0a1a;border:1px solid rgba(124,106,255,0.35);border-radius:6px;color:#eaeaf5;font-size:11px;font-weight:600;cursor:pointer;outline:none;">' +
-              '<option value="" selected disabled>⚙️ Action Chuno...</option>' +
-              '<option value="ihms">🏥 IHMS Lock Reset</option>' +
-              '<option value="device">💻 Device / Multi-PC Manager</option>' +
-              '<option value="logs">📊 Credit Usage Logs</option>' +
-              '<option value="toggle_user">' + (isDisabled ? '✅ User ko ON karo' : '❌ User ko OFF karo') + '</option>' +
-              '<option value="toggle_pro">' + (isPro ? '⚡ PRO Mode OFF karo' : '⚡ PRO Mode ON karo') + '</option>' +
-              '<option value="toggle_tabs">' + (isTabs ? '🖥️ Worker Tabs OFF karo' : '🖥️ Worker Tabs ON karo') + '</option>' +
-              '<option value="toggle_hid">' + (isHid ? '📋 HID List OFF karo' : '📋 HID List ON karo') + '</option>' +
-              '<option value="toggle_bulk">' + (u.smart_bulk_enabled ? '🎯 Smart Bulk OFF karo' : '🎯 Smart Bulk ON karo') + '</option>' +
-              '<option value="toggle_speedboost">' + (isSpeedBoost ? '🚀 Speed Boost OFF karo' : '🚀 Speed Boost ON karo') + '</option>' +
-              '<option value="hid_cost">⚡ HID Credit Cost Set</option>' +
-              '<option value="speed">⏱️ Speed Settings</option>' +
-              '<option value="grant_bonus">🎁 +10 Din & +1,000 Credits Grant</option>' +
-              '<option value="banner">📢 Banner Bhejo</option>' +
-            '</select>' +
-          '</td></tr>';
       });
-      html += '</tbody></table>';
-      container.innerHTML = html;
+
+      // Sort expired/expiring list: Expiring soon first (so admin sees them before full expiry), then others
+      expiredOrExpiringUsers.sort((a, b) => {
+        if (a._badgeType === 'expiring_soon' && b._badgeType !== 'expiring_soon') return -1;
+        if (a._badgeType !== 'expiring_soon' && b._badgeType === 'expiring_soon') return 1;
+        return 0;
+      });
+
+      container.innerHTML = `
+        <div class="users-split-container">
+          <!-- Summary Counts Toolbar -->
+          <div class="users-split-toolbar">
+            <div class="user-pill-tag tag-active">
+              🟢 Active Plans: <strong>${activeUsers.length}</strong>
+            </div>
+            <div class="user-pill-tag tag-expired">
+              ⚠️ Expired / Expiring Soon: <strong>${expiredOrExpiringUsers.length}</strong>
+            </div>
+            <div class="user-pill-tag tag-total">
+              👥 Total Filtered: <strong>${filtered.length}</strong>
+            </div>
+          </div>
+
+          <!-- SECTION 1: Active Users (Latest Plan Active) -->
+          <div class="user-section-card">
+            <div class="user-section-header green-accent">
+              <div class="user-section-title">
+                <span>🟢 Active Users (Latest Plan Active)</span>
+                <span class="user-section-badge green">${activeUsers.length} Active</span>
+              </div>
+              <div class="user-section-hint">Ye users currently active hain aur inka plan chalu hai</div>
+            </div>
+            <div class="table-scroll-wrap">
+              ${buildUserTableHtml(activeUsers, false)}
+            </div>
+          </div>
+
+          <!-- SECTION 2: Expired & Expiring Soon Users -->
+          <div class="user-section-card">
+            <div class="user-section-header amber-accent">
+              <div class="user-section-title">
+                <span>⚠️ Expired & Expiring Soon Users</span>
+                <span class="user-section-badge amber">${expiredOrExpiringUsers.length} Users</span>
+              </div>
+              <div class="user-section-hint">Jo users expire ho chuke hain ya jinki validity / credits khatam hone wale hain</div>
+            </div>
+            <div class="table-scroll-wrap">
+              ${buildUserTableHtml(expiredOrExpiringUsers, true)}
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     // " bhi escape karo — warna onclick="..." attribute se bahar nikal sakta hai
