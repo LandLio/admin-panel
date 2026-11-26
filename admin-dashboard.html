@@ -570,6 +570,70 @@
       .stat-card-value { font-size: 22px; }
       .stat-card-icon-box { width: 34px; height: 34px; font-size: 18px; }
     }
+
+    /* Online Payment Gateway Switcher Panel */
+    .paygw-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;
+    }
+    @media (max-width: 720px) { .paygw-grid { grid-template-columns: 1fr; } }
+    .paygw-card {
+      background: #141d2e; border: 1.5px solid var(--border-subtle);
+      border-radius: 10px; padding: 14px 16px; cursor: pointer;
+      display: flex; align-items: center; gap: 12px; transition: all 0.16s ease;
+    }
+    .paygw-card:hover { background: #182338; border-color: rgba(255,255,255,0.2); }
+    .paygw-card.selected-cashfree {
+      background: rgba(16, 185, 129, 0.1); border-color: #10b981;
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.16);
+    }
+    .paygw-card.selected-payu {
+      background: rgba(168, 85, 247, 0.1); border-color: #a855f7;
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.16);
+    }
+    .paygw-radio {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid #64748b; display: inline-flex;
+      align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .paygw-card.selected-cashfree .paygw-radio { border-color: #10b981; }
+    .paygw-card.selected-payu .paygw-radio { border-color: #a855f7; }
+    .paygw-radio::after {
+      content: ""; width: 8px; height: 8px; border-radius: 50%; background: transparent;
+    }
+    .paygw-card.selected-cashfree .paygw-radio::after { background: #10b981; }
+    .paygw-card.selected-payu .paygw-radio::after { background: #a855f7; }
+    .paygw-toggle-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 12px 16px; background: #141d2e; border: 1px solid var(--border-subtle);
+      border-radius: 10px; flex-wrap: wrap;
+    }
+    .paygw-switch {
+      position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0;
+    }
+    .paygw-switch input { opacity: 0; width: 0; height: 0; }
+    .paygw-slider {
+      position: absolute; cursor: pointer; inset: 0; background: #ef4444;
+      border-radius: 999px; transition: 0.2s;
+    }
+    .paygw-slider::before {
+      content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background: #fff; border-radius: 50%; transition: 0.2s;
+    }
+    .paygw-switch input:checked + .paygw-slider { background: #10b981; }
+    .paygw-switch input:checked + .paygw-slider::before { transform: translateX(22px); }
+    .paygw-recent-wrap {
+      margin-top: 16px; border: 1px solid var(--border-subtle);
+      border-radius: 10px; overflow: hidden; background: rgba(15, 23, 42, 0.55);
+    }
+    .paygw-recent-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    .paygw-recent-table th {
+      text-align: left; padding: 9px 12px; color: var(--text-muted);
+      background: #121a29; border-bottom: 1px solid var(--border-subtle);
+      font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .paygw-recent-table td {
+      padding: 8px 12px; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
   </style>
 </head>
 <body>
@@ -888,6 +952,97 @@
         </div>
       </div>
 
+      <!-- ==================== 💳 ONLINE PAYMENT GATEWAY SWITCHER ==================== -->
+      <div class="banner-panel" id="paymentGatewayPanel" style="margin-bottom:20px; border:1px solid rgba(16,185,129,0.3); border-radius:14px; background:#0e1522;">
+        <div class="panel-header">
+          <div class="panel-title" style="color:#6ee7b7; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span>💳 Online Payment Control — Cashfree ↔ PayU Switcher</span>
+            <span id="payGwLiveBadge" style="font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:20px;background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.35);">⏳ Loading...</span>
+          </div>
+          <button type="button" class="collapse-toggle-btn active" id="payGwToggleBtn" onclick="togglePayGwCollapse(event)">
+            <span id="payGwArrow">▲</span>
+            <span id="payGwToggleText">Band Karein / Close</span>
+          </button>
+        </div>
+
+        <div class="panel-body collapse-body" id="payGwPanelBody" style="display:block;">
+          <!-- Master ON / OFF Switch -->
+          <div class="paygw-toggle-row">
+            <div>
+              <div style="font-size:13.5px;font-weight:800;color:#f8fafc;">⚡ Online Payment Mode (ON / OFF)</div>
+              <div id="payGwModeSub" style="font-size:11.5px;color:#94a3b8;margin-top:2px;">
+                ON = Extension users direct Cashfree ya PayU se recharge kar sakte hain • OFF = Payment buttons par custom notice dikhega
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="payGwToggleStateLabel" style="font-size:12px;font-weight:800;color:#34d399;">ON</span>
+              <label class="paygw-switch">
+                <input type="checkbox" id="payGwEnabled" checked>
+                <span class="paygw-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Gateway Choice Cards -->
+          <div class="paygw-grid">
+            <div class="paygw-card selected-cashfree" id="payGwCardCashfree" data-gw="cashfree">
+              <div class="paygw-radio"></div>
+              <div style="flex:1;">
+                <div style="font-size:13.5px;font-weight:800;color:#ffffff;">💚 Cashfree Gateway</div>
+                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">UPI / QR / Cards • Jab PayU down ho tab use karein</div>
+              </div>
+            </div>
+            <div class="paygw-card" id="payGwCardPayu" data-gw="payu">
+              <div class="paygw-radio"></div>
+              <div style="flex:1;">
+                <div style="font-size:13.5px;font-weight:800;color:#ffffff;">💜 PayU Gateway</div>
+                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">PayU Money Checkout • Jab PayU chalu ho jaye tab 1 click mein switch karein</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Disabled Message -->
+          <div class="banner-form-row" id="payGwDisabledMsgRow" style="margin-top:14px;">
+            <label class="banner-form-label">📢 Payment OFF hone par user ko dikhne wala message</label>
+            <input type="text" class="banner-input" id="payGwDisabledMsg" placeholder="Abhi online payment band hai — kripya admin se contact karein.">
+          </div>
+
+          <!-- Save Bar -->
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-subtle);flex-wrap:wrap;">
+            <div id="payGwSaveStatus" style="font-size:12px;color:#94a3b8;font-weight:600;"></div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <button type="button" class="banner-preset-btn" id="btnReloadPayGw">🔄 Refresh Status</button>
+              <button type="button" class="banner-save-btn" id="btnSavePayGw">💾 Save Payment Settings</button>
+            </div>
+          </div>
+
+          <!-- Recent DATA ENTRY Payments -->
+          <div class="paygw-recent-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#141c2c;border-bottom:1px solid var(--border-subtle);">
+              <span style="font-size:12px;font-weight:800;color:#e2e8f0;">🧾 Recent DATA ENTRY Payments (Last 10)</span>
+              <span id="payGwRecentCount" style="font-size:11px;color:#94a3b8;">0 records</span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="paygw-recent-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Email</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Gateway</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="payGwRecentBody">
+                  <tr><td colspan="7" style="text-align:center;color:#64748b;padding:16px;">Loading recent payments...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Bulk Actions Panel -->
       <div class="panel" style="border: 1px solid rgba(16,185,129,0.25);">
@@ -1924,6 +2079,7 @@
           mainApp.style.cssText = 'display: block !important;';
         }
         try { loadBannerSettings(); } catch(e){}
+        try { loadPaymentGatewaySettings(); } catch(e){}
         try { loadDashboard(); } catch(e){}
       } else {
         if (pwError) pwError.textContent = '❌ Galat password!';
@@ -1932,7 +2088,294 @@
       }
     };
 
+    // ==================== 💳 ONLINE PAYMENT GATEWAY SWITCHER ====================
+    let currentPayGw = 'cashfree';
+    let savedPayState = null;
+
+    function escPayHtml(val) {
+      return String(val == null ? '' : val)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function togglePayGwCollapse(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const body = document.getElementById('payGwPanelBody');
+      const arrow = document.getElementById('payGwArrow');
+      const text = document.getElementById('payGwToggleText');
+      const btn = document.getElementById('payGwToggleBtn');
+      if (!body) return;
+      const isHidden = (body.style.display === 'none');
+      if (isHidden) {
+        body.style.display = 'block';
+        if (arrow) arrow.textContent = '▲';
+        if (text) text.textContent = 'Band Karein / Close';
+        if (btn) btn.classList.add('active');
+      } else {
+        body.style.display = 'none';
+        if (arrow) arrow.textContent = '▼';
+        if (text) text.textContent = 'Kholein / Open';
+        if (btn) btn.classList.remove('active');
+      }
+    }
+
+    function renderLivePayBadge(saved) {
+      const badge = document.getElementById('payGwLiveBadge');
+      if (!badge || !saved) return;
+      const gwLabel = saved.gateway === 'payu' ? 'PAYU' : 'CASHFREE';
+      if (!saved.enabled) {
+        badge.textContent = '🔴 SERVER LIVE: PAYMENT OFF (' + gwLabel + ')';
+        badge.style.background = 'rgba(239,68,68,0.16)';
+        badge.style.color = '#f87171';
+        badge.style.borderColor = 'rgba(239,68,68,0.35)';
+      } else if (saved.gateway === 'payu') {
+        badge.textContent = '🟣 SERVER LIVE: PAYU';
+        badge.style.background = 'rgba(168,85,247,0.16)';
+        badge.style.color = '#d8b4fe';
+        badge.style.borderColor = 'rgba(168,85,247,0.38)';
+      } else {
+        badge.textContent = '🟢 SERVER LIVE: CASHFREE';
+        badge.style.background = 'rgba(16,185,129,0.16)';
+        badge.style.color = '#34d399';
+        badge.style.borderColor = 'rgba(16,185,129,0.38)';
+      }
+    }
+
+    function updatePayGwDirtyHint() {
+      const statusEl = document.getElementById('payGwSaveStatus');
+      const btnSave = document.getElementById('btnSavePayGw');
+      if (!savedPayState) return;
+      const chk = document.getElementById('payGwEnabled');
+      const msgInp = document.getElementById('payGwDisabledMsg');
+      const draftEnabled = !!(chk && chk.checked);
+      const draftMsg = (msgInp ? msgInp.value : '').trim();
+      const dirty = (
+        draftEnabled !== savedPayState.enabled ||
+        currentPayGw !== savedPayState.gateway ||
+        draftMsg !== (savedPayState.disabledMsg || '').trim()
+      );
+      if (btnSave) {
+        btnSave.style.boxShadow = dirty ? '0 0 18px rgba(245, 158, 11, 0.55)' : '';
+      }
+      if (statusEl) {
+        const liveText = savedPayState.enabled ? (savedPayState.gateway.toUpperCase() + ' ON') : 'PAYMENT OFF';
+        if (dirty) {
+          statusEl.textContent = '⚠️ Unsaved change! Server par abhi ' + liveText + ' chal raha hai — apply karne ke liye "Save Payment Settings" dabayein.';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = '✅ Saved on server: ' + liveText;
+          statusEl.style.color = '#34d399';
+        }
+      }
+    }
+
+    function renderPayGwState(enabled, gateway, disabledMsg) {
+      const gw = (String(gateway || 'cashfree').toLowerCase() === 'payu') ? 'payu' : 'cashfree';
+      currentPayGw = gw;
+      const isOn = (enabled !== false);
+
+      const chk = document.getElementById('payGwEnabled');
+      if (chk) chk.checked = isOn;
+
+      const lbl = document.getElementById('payGwToggleStateLabel');
+      if (lbl) {
+        lbl.textContent = isOn ? 'ON' : 'OFF';
+        lbl.style.color = isOn ? '#34d399' : '#f87171';
+      }
+
+      const cardCf = document.getElementById('payGwCardCashfree');
+      const cardPu = document.getElementById('payGwCardPayu');
+      if (cardCf) cardCf.className = 'paygw-card' + (gw === 'cashfree' ? ' selected-cashfree' : '');
+      if (cardPu) cardPu.className = 'paygw-card' + (gw === 'payu' ? ' selected-payu' : '');
+
+      const msgInput = document.getElementById('payGwDisabledMsg');
+      if (msgInput && typeof disabledMsg === 'string') {
+        msgInput.value = disabledMsg;
+      }
+      updatePayGwDirtyHint();
+    }
+
+    function renderPayGwRecentRows(payments) {
+      const tbody = document.getElementById('payGwRecentBody');
+      const countEl = document.getElementById('payGwRecentCount');
+      if (!tbody) return;
+      const list = Array.isArray(payments) ? payments.slice(0, 10) : [];
+      if (countEl) countEl.textContent = list.length + ' records';
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:14px;">Abhi koi online payment record nahi hai.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map((p) => {
+        const oid = escPayHtml(p.txn_id || p.order_id || p.txnid || '-');
+        const email = escPayHtml(p.email || p.user_email || '-');
+        const basePlan = p.plan_label || p.plan || (p.days ? (p.days + 'd') : '-');
+        const plan = escPayHtml(p.credits ? (basePlan + ' (' + p.credits + ' cr)') : basePlan);
+        const amt = (p.amount != null && p.amount !== '') ? ('₹' + escPayHtml(p.amount)) : '-';
+        const gwRaw = String(p.gateway || '-').toLowerCase();
+        const gwPill = gwRaw === 'payu'
+          ? '<span style="padding:2px 8px;border-radius:999px;background:rgba(168,85,247,0.16);color:#d8b4fe;font-weight:700;">PayU</span>'
+          : '<span style="padding:2px 8px;border-radius:999px;background:rgba(16,185,129,0.16);color:#6ee7b7;font-weight:700;">' + escPayHtml(p.gateway || 'Cashfree') + '</span>';
+        const stRaw = String(p.status || 'pending').toUpperCase();
+        const isPaid = (stRaw === 'PAID' || stRaw === 'SUCCESS' || stRaw === 'CAPTURED');
+        const stColor = isPaid ? '#34d399' : (stRaw === 'FAILED' ? '#f87171' : '#fbbf24');
+        let dt = '-';
+        const rawDate = p.paid_at || p.created_at;
+        if (rawDate) {
+          try { dt = escPayHtml(new Date(rawDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })); } catch (_) {}
+        }
+        return '<tr>' +
+          '<td style="font-family:monospace;font-size:11px;">' + oid + '</td>' +
+          '<td>' + email + '</td>' +
+          '<td>' + plan + '</td>' +
+          '<td style="font-weight:700;color:#fff;">' + amt + '</td>' +
+          '<td>' + gwPill + '</td>' +
+          '<td style="font-weight:800;color:' + stColor + ';">' + escPayHtml(stRaw) + '</td>' +
+          '<td style="color:#94a3b8;">' + dt + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    async function loadPaymentGatewaySettings() {
+      const statusEl = document.getElementById('payGwSaveStatus');
+      const badge = document.getElementById('payGwLiveBadge');
+      if (!adminPassword) return;
+      if (statusEl) { statusEl.textContent = '⏳ Payment settings load ho rahi hain...'; statusEl.style.color = '#94a3b8'; }
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/de-api', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          },
+          body: JSON.stringify({
+            action: 'admin_payment_settings_get',
+            admin_password: adminPassword
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          const msg = data.error || ('HTTP_' + res.status);
+          if (badge) {
+            badge.textContent = '⚠️ Redeploy de-api';
+            badge.style.background = 'rgba(245,158,11,0.16)';
+            badge.style.color = '#fbbf24';
+            badge.style.borderColor = 'rgba(245,158,11,0.35)';
+          }
+          if (statusEl) {
+            statusEl.textContent = '⚠️ Edge function update zaroori hai (' + msg + ') — Supabase mein de-api redeploy karein.';
+            statusEl.style.color = '#fbbf24';
+          }
+          return;
+        }
+        const loadedGw = (String(data.payment_gateway || 'cashfree').toLowerCase() === 'payu') ? 'payu' : 'cashfree';
+        savedPayState = {
+          enabled: data.payment_enabled !== false,
+          gateway: loadedGw,
+          disabledMsg: data.payment_disabled_msg || ''
+        };
+        renderLivePayBadge(savedPayState);
+        renderPayGwState(savedPayState.enabled, savedPayState.gateway, savedPayState.disabledMsg);
+        renderPayGwRecentRows(data.payments || []);
+      } catch (err) {
+        if (statusEl) {
+          statusEl.textContent = '❌ Network error: ' + err.message;
+          statusEl.style.color = '#f87171';
+        }
+      }
+    }
+
+    async function savePaymentGatewaySettings() {
+      const btn = document.getElementById('btnSavePayGw');
+      const statusEl = document.getElementById('payGwSaveStatus');
+      const enabled = !!(document.getElementById('payGwEnabled') && document.getElementById('payGwEnabled').checked);
+      const disabledMsg = (document.getElementById('payGwDisabledMsg') && document.getElementById('payGwDisabledMsg').value || '').trim();
+      if (!adminPassword) {
+        if (statusEl) { statusEl.textContent = '❌ Pehle admin login karein.'; statusEl.style.color = '#f87171'; }
+        return;
+      }
+      if (btn) btn.disabled = true;
+      if (statusEl) { statusEl.textContent = '⏳ Save ho raha hai...'; statusEl.style.color = '#94a3b8'; }
+      try {
+        const res = await fetch(SUPABASE_URL + '/functions/v1/de-api', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          },
+          body: JSON.stringify({
+            action: 'admin_payment_settings_save',
+            admin_password: adminPassword,
+            payment_enabled: enabled,
+            payment_gateway: currentPayGw,
+            payment_disabled_msg: disabledMsg
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          if (statusEl) {
+            statusEl.textContent = '❌ Save failed: ' + (data.error || ('HTTP_' + res.status)) + ' (check de-api redeploy)';
+            statusEl.style.color = '#f87171';
+          }
+          return;
+        }
+        const savedGw = (String(data.payment_gateway || currentPayGw).toLowerCase() === 'payu') ? 'payu' : 'cashfree';
+        savedPayState = {
+          enabled: data.payment_enabled !== false,
+          gateway: savedGw,
+          disabledMsg: data.payment_disabled_msg || ''
+        };
+        renderLivePayBadge(savedPayState);
+        renderPayGwState(savedPayState.enabled, savedPayState.gateway, savedPayState.disabledMsg);
+        if (statusEl) {
+          statusEl.textContent = '✅ Saved! Ab server par ' + savedGw.toUpperCase() + ' (' + (savedPayState.enabled ? 'ON' : 'OFF') + ') live hai.';
+          statusEl.style.color = '#34d399';
+        }
+      } catch (err) {
+        if (statusEl) {
+          statusEl.textContent = '❌ Error: ' + err.message;
+          statusEl.style.color = '#f87171';
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function bindPayGwControls() {
+      const cf = document.getElementById('payGwCardCashfree');
+      const pu = document.getElementById('payGwCardPayu');
+      const chk = document.getElementById('payGwEnabled');
+      const msgInp = document.getElementById('payGwDisabledMsg');
+      const btnSave = document.getElementById('btnSavePayGw');
+      const btnReload = document.getElementById('btnReloadPayGw');
+      if (cf) cf.addEventListener('click', () => {
+        const isOn = !!(chk && chk.checked);
+        const msg = msgInp ? msgInp.value : '';
+        renderPayGwState(isOn, 'cashfree', msg);
+      });
+      if (pu) pu.addEventListener('click', () => {
+        const isOn = !!(chk && chk.checked);
+        const msg = msgInp ? msgInp.value : '';
+        renderPayGwState(isOn, 'payu', msg);
+      });
+      if (chk) chk.addEventListener('change', () => {
+        const msg = msgInp ? msgInp.value : '';
+        renderPayGwState(chk.checked, currentPayGw, msg);
+      });
+      if (msgInp) msgInp.addEventListener('input', updatePayGwDirtyHint);
+      if (btnSave) btnSave.addEventListener('click', savePaymentGatewaySettings);
+      if (btnReload) btnReload.addEventListener('click', loadPaymentGatewaySettings);
+    }
+
     function initAdminDashboard() {
+      bindPayGwControls();
       const pwInput = document.getElementById('pwInput');
       const pwBtn = document.getElementById('pwBtn');
       if (pwBtn) pwBtn.addEventListener('click', window.tryLogin);
@@ -1949,6 +2392,7 @@
       if (refBtn) {
         refBtn.addEventListener('click', async () => {
           await loadBannerSettings();
+          await loadPaymentGatewaySettings();
           await loadDashboard();
         });
       }
